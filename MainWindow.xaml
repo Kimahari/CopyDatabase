@@ -1,0 +1,244 @@
+﻿<metro:MetroWindow  x:Class="DataBaseCompare.MainWindow"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:local="clr-namespace:DataBaseCompare"
+                    xmlns:helpers="clr-namespace:DataBaseCompare.Helpers"
+                    xmlns:vm="clr-namespace:DataBaseCompare.ViewModels"
+                    xmlns:views="clr-namespace:DataBaseCompare.Views"
+                    ShowIconOnTitleBar="True"
+                    d:DataContext="{d:DesignInstance Type=vm:MainViewModel, IsDesignTimeCreatable=True}"
+                    mc:Ignorable="d"
+                    xmlns:meterialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    GlowBrush="{DynamicResource AccentColorBrush}"
+                    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+                    Icon="database_access.ico"
+                    TextElement.FontWeight="Regular"
+                    TextElement.FontSize="13"
+                    TextOptions.TextFormattingMode="Ideal" 
+                    TextOptions.TextRenderingMode="Auto"        
+                    Background="{DynamicResource MaterialDesignPaper}"
+                    FontFamily="{DynamicResource MaterialDesignFont}"
+                    BorderThickness="1"
+                    Title="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Height="450" Width="800">
+    <metro:MetroWindow.DataContext>
+        <vm:MainViewModel/>
+    </metro:MetroWindow.DataContext>
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Border BorderBrush="AliceBlue" BorderThickness="0,0,1,0">
+            <StackPanel>
+                <Label HorizontalAlignment="Center" >Source</Label>
+                <views:ConnectionView DataContext="{Binding SourceConnection}"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Column="1">
+            <Label HorizontalAlignment="Center" >Destination</Label>
+            <views:ConnectionView DataContext="{Binding DestinationConnection}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Margin="2" Command="{Binding LoadSourceDatabases}" >Load Databases</Button>
+                <Button Margin="2" Command="{Binding SelectAll}" >Select All</Button>
+            </StackPanel>
+
+            <metro:MetroProgressBar Visibility="{Binding IsBusy, Converter={StaticResource CollapsedIfFalse}}" IsIndeterminate="True" Grid.ColumnSpan="2" Grid.Row="1"/>
+            <ScrollViewer Grid.Row="2">
+                <ItemsControl Background="Transparent" ItemsSource="{Binding Databases}" >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox IsChecked="{Binding IsSelected,Mode=TwoWay}" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Content="{Binding Name}"/>
+
+                                    <Button Command="{Binding RefreshDatabaseTables}" Visibility="{Binding ShowTables, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" Grid.Column="1" Margin="1" >
+                                        <meterialDesign:PackIcon Kind="Refresh"/>
+                                    </Button>
+
+                                    <Button Command="{Binding ShowTablesCommand}" Grid.Column="2" Margin="1">
+                                        <meterialDesign:PackIcon Kind="Eye"/>
+                                    </Button>
+
+                                    <Button Command="{Binding HideTablesCommand}" Grid.Column="3" Margin="1">
+                                        <meterialDesign:PackIcon Kind="EyeOff"/>
+                                    </Button>
+
+
+                                </Grid>
+
+                                <metro:MetroProgressBar Visibility="{Binding IsBusy, Converter={StaticResource CollapsedIfFalse}}" IsIndeterminate="True" Grid.Row="1"/>
+
+                                <Label BorderBrush="Red" BorderThickness="0,0,0,0" Grid.Row="2" Visibility="{Binding Message, Converter={StaticResource HasValue}, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Message, UpdateSourceTrigger=PropertyChanged}"></Label>
+                                <TextBox IsReadOnly="True" Foreground="Red" Grid.Row="2" Visibility="{Binding Error, Converter={StaticResource HasValue}, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Error, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+
+                                <Label Margin="30,0,0,0" Grid.Row="3" FontSize="20" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" >Tables</Label>
+                                <Border MaxHeight="150" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" BorderBrush="White" BorderThickness="0,0,0,1" Margin="5" Grid.Row="4">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl Margin="30,0,0,0" ItemsSource="{Binding Tables}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" >
+                                                        <meterialDesign:PackIcon Kind="Table"/>
+                                                        <TextBlock Margin="2" Text="{Binding Name}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <Label Margin="30,0,0,0" Grid.Row="5" FontSize="20" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" >Views</Label>
+                                <Border MaxHeight="150" Grid.Row="6" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" BorderBrush="White" BorderThickness="0,0,0,1" Margin="5">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl Margin="30,0,0,0" ItemsSource="{Binding Views}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" >
+                                                        <meterialDesign:PackIcon Kind="Table"/>
+                                                        <TextBlock Margin="2" Text="{Binding Name}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <Label Margin="30,0,0,0" Grid.Row="7" FontSize="20" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" >Stored Procedures / Functions</Label>
+                                <Border MaxHeight="150" Grid.Row="8" Visibility="{Binding ShowTables,UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CollapsedIfFalse}}" BorderBrush="White" BorderThickness="0,0,0,1" Margin="5">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl Margin="30,0,0,0" ItemsSource="{Binding Routines}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" >
+                                                        <meterialDesign:PackIcon Kind="Table"/>
+                                                        <TextBlock Margin="2" Text="{Binding Name}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <StackPanel Orientation="Horizontal" Grid.Row="3">
+                <metro:ToggleSwitch IsChecked="{Binding CopyTables}" Content="Tables"/>
+                <metro:ToggleSwitch IsChecked="{Binding CopyData}" Content="Data"/>
+            </StackPanel>
+
+            <Grid Grid.Row="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Visibility="{Binding Message, Converter={StaticResource HasValue}, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Message, UpdateSourceTrigger=PropertyChanged}"></Label>
+                <Label Foreground="Red" Grid.Row="1" Visibility="{Binding Error, Converter={StaticResource HasValue}, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Error, UpdateSourceTrigger=PropertyChanged}"></Label>
+                <Button Grid.Row="2" Command="{Binding CopySelectedDatabases}" >Copy Database</Button>
+            </Grid>
+        </Grid>
+
+        <metro:Flyout Header="Database Config" IsOpen="{Binding SourceConnection.ShowConfiguration, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Position="Left" Width="300" Grid.ColumnSpan="5" Grid.RowSpan="5" Background="{DynamicResource HighlightBrush}">
+            <StackPanel DataContext="{Binding SourceConnection}">
+                <Label HorizontalContentAlignment="Center" FontSize="30" >Source Database</Label>
+                <Border Margin="1,0,1,0" BorderThickness="0,0,0,1" BorderBrush="White" ></Border>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80" >Instance</Label>
+                    <TextBox Text="{Binding ServerInstance}"></TextBox>
+                </DockPanel>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80">UserName</Label>
+                    <TextBox Text="{Binding UserName}" ></TextBox>
+                </DockPanel>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80">Password</Label>
+                    <PasswordBox helpers:PasswordHelper.Attach="True" helpers:PasswordHelper.Password="{Binding Password, Converter={StaticResource SecureValue}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></PasswordBox>
+                </DockPanel>
+
+                <Button Grid.Column="2" Margin="1" TabIndex="-1" Command="{Binding TestConnection}">
+                    <StackPanel Orientation="Horizontal">
+                        <meterialDesign:PackIcon Kind="Play"></meterialDesign:PackIcon>
+                        <TextBlock>Test Connection</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <TextBlock HorizontalAlignment="Center" Text="{Binding Message}" Visibility="{Binding Message, Converter={StaticResource HasValue}}" Grid.ColumnSpan="4" Grid.Row="1"/>
+
+                <TextBox IsReadOnly="True" BorderThickness="0" TextWrapping="Wrap" Text="{Binding ConnectionError}" Visibility="{Binding ConnectionError, Converter={StaticResource HasValue}}" Foreground="Red" Grid.ColumnSpan="4" Grid.Row="1"/>
+
+                <metro:MetroProgressBar Visibility="{Binding IsBusy,Converter={StaticResource CollapsedIfFalse}, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" IsIndeterminate="True" Grid.ColumnSpan="4" />
+
+            </StackPanel>
+        </metro:Flyout>
+
+        <metro:Flyout Header="Database Config" IsOpen="{Binding DestinationConnection.ShowConfiguration, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Position="Right" Width="300" Grid.ColumnSpan="5" Grid.RowSpan="5" Background="{DynamicResource HighlightBrush}">
+            <StackPanel DataContext="{Binding DestinationConnection}" >
+                <Label HorizontalContentAlignment="Center" FontSize="30" >Destination Database</Label>
+                <Border Margin="1,0,1,0" BorderThickness="0,0,0,1" BorderBrush="White" ></Border>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80" >Instance</Label>
+                    <TextBox Text="{Binding ServerInstance}"></TextBox>
+                </DockPanel>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80">UserName</Label>
+                    <TextBox Text="{Binding UserName}" ></TextBox>
+                </DockPanel>
+
+                <DockPanel Margin="3">
+                    <Label VerticalAlignment="Center" Width="80">Password</Label>
+                    <TextBox Text="{Binding Password, Converter={StaticResource SecureValue}}" ></TextBox>
+                </DockPanel>
+
+            </StackPanel>
+        </metro:Flyout>
+    </Grid>
+</metro:MetroWindow>
