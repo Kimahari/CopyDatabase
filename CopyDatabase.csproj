@@ -15,7 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>C:\inetpub\wwwroot\Sybrin Enterprise Suite\CopyDatabase\</PublishUrl>
+    <PublishUrl>.\Publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -25,11 +25,11 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://jnb-bpm:13000/CopyDatabase/</InstallUrl>
-    <UpdateUrl>http://jnb-bpm:13000/CopyDatabase/</UpdateUrl>
+    <InstallUrl>https://raw.githubusercontent.com/Kimahari/CopyDatabase/master/Publish/</InstallUrl>
+    <UpdateUrl>https://raw.githubusercontent.com/Kimahari/CopyDatabase/master/Publish/</UpdateUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>Index.html</WebPage>
-    <ApplicationRevision>8</ApplicationRevision>
+    <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -59,7 +59,7 @@
     <ApplicationIcon>database_access.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>121C6AEF380CB5F2A7EBE9635DAF221CFBF90FE5</ManifestCertificateThumbprint>
@@ -196,6 +196,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="database_access.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="Copy Database.exe.manifest">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Auto</PublishState>
+      <IncludeHash>False</IncludeHash>
+      <FileType>ManifestEntryPoint</FileType>
+    </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

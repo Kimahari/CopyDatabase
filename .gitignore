@@ -3,3 +3,6 @@
 /obj
 /.vs
 /CompareDatabase.pfx
+/CopyDatabaseInstaller/Debug
+/CopyDatabaseInstaller/Release
+/*.user
