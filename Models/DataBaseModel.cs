@@ -62,21 +62,11 @@ namespace DataBaseCompare.Models {
         internal async Task CopyToAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, bool copyTables, bool copyData, CancellationToken token) {
             StartOperation();
             try {
-                await RemoveIfExistsAsync(destinationConnection, destinationDatabases, token);
-                await EnsureCreatedAsync(destinationConnection, token).ConfigureAwait(false);
-
-                if (copyTables) {
-                    using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
-                        await connection.OpenAsync().ConfigureAwait(false);
-
-                        var copyArguments = CreateArguments(destinationConnection, copyData, connection, token);
-
-                        await CopyDatabaseObjectsAsync(copyArguments);
-
-                        if (String.IsNullOrEmpty(Error)) copyArguments.Transaction.Commit(); else copyArguments.Transaction.Rollback();
-
-                        if (!String.IsNullOrEmpty(Error)) throw new Exception(Error);
-                    }
+                await RecreateDatabase(destinationConnection, destinationDatabases, token);
+                using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    var copyArguments = CreateArguments(destinationConnection, copyData, connection, token);
+                    await CopyTables(copyArguments, copyTables);
                 }
             } catch (Exception ex) {
                 this.Error = ex.Message;
@@ -85,6 +75,18 @@ namespace DataBaseCompare.Models {
                 this.IsBusy = false;
                 Message = String.Empty;
             }
+        }
+
+        private async Task RecreateDatabase(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, CancellationToken token) {
+            await RemoveIfExistsAsync(destinationConnection, destinationDatabases, token);
+            await EnsureCreatedAsync(destinationConnection, token).ConfigureAwait(false);
+        }
+
+        private async Task CopyTables(CopyToArguments copyArguments, bool copyTables) {
+            if (!copyTables) return;
+            await CopyDatabaseObjectsAsync(copyArguments);
+            if (String.IsNullOrEmpty(Error)) copyArguments.Transaction.Commit(); else copyArguments.Transaction.Rollback();
+            if (!String.IsNullOrEmpty(Error)) throw new Exception(Error);
         }
 
         private CopyToArguments CreateArguments(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, CancellationToken token) {
