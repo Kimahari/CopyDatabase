@@ -1,98 +1,107 @@
 ﻿using DataBaseCompare.Tools;
 using Prism.Commands;
-using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
+
     public class ConnectionModel : ModelBase {
-        private bool changes = false;
+
+        #region Fields
 
         internal string serverInstance;
-        public string ServerInstance { get => serverInstance; set { changes = true; SetProperty(ref serverInstance, value); ConnectionError = ""; TestConnection.RaiseCanExecuteChanged(); } }
+        private bool changes;
+        private string connectionError;
+        private SecureString password;
+        private bool showConfiguration;
+        private string userName;
+
+        #endregion Fields
+
+        #region Constructors
 
         public ConnectionModel() {
-            this.TestConnection = new DelegateCommand(onTestConnection, canTestConnection);
-            this.EditConfigurationCommand = new DelegateCommand(() => {
+            TestConnection = new DelegateCommand(OnTestConnectionAsync, CanTestConnection);
+            EditConfigurationCommand = new DelegateCommand(() => {
                 ShowConfiguration = !ShowConfiguration;
             });
         }
 
-        public DelegateCommand TestConnection { get; }
+        #endregion Constructors
+
+        #region Properties
+
+        public string ConnectionError { get => connectionError; set => SetProperty(ref connectionError, value); }
+
         public DelegateCommand EditConfigurationCommand { get; }
 
-        private string connectionError;
+        public SecureString Password { get => password; set => SetProperty(ref password, value); }
 
-        public string ConnectionError {
-            get { return connectionError; }
-            set { SetProperty(ref connectionError, value); }
+        public string ServerInstance {
+            get => serverInstance; set {
+                changes = true; SetProperty(ref serverInstance, value); ConnectionError = ""; TestConnection.RaiseCanExecuteChanged();
+            }
         }
 
-        private bool showConfiguration;
+        public bool ShowConfiguration { get => showConfiguration; set => SetProperty(ref showConfiguration, value); }
 
-        public bool ShowConfiguration {
-            get { return showConfiguration; }
-            set { SetProperty(ref showConfiguration, value); }
-        }
+        public DelegateCommand TestConnection { get; }
 
+        public string UserName { get => userName; set => SetProperty(ref userName, value); }
 
-        private string userName;
+        #endregion Properties
 
-        public string UserName {
-            get { return userName; }
-            set { SetProperty(ref userName, value); }
-        }
+        #region Methods
 
-        private SecureString password;
-
-        public SecureString Password {
-            get { return password; }
-            set { SetProperty(ref password, value); }
-        }
-
-        private bool canTestConnection() {
-            return !this.IsBusy && !String.IsNullOrEmpty(ServerInstance);
-        }
-
-        private async void onTestConnection() {
-            await TestDBConnection();
-        }
-
-        internal async Task TestDBConnection() {
-            setIsBusy(true);
-            this.Message = "Teting Connection ...";
-            this.ConnectionError = "";
+        internal async Task TestDBConnectionAsync() {
+            SetIsBusy(true, "Teting Connection ...");
+            ConnectionError = "";
 
             await Task.Factory.StartNew(() => {
                 using (var connection = new SqlConnection(this.BuildConnection())) {
                     try {
                         connection.Open();
                     } catch (Exception ex) {
-                        this.ConnectionError = ex.Message;
+                        ConnectionError = ex.Message;
                     }
                 }
-            });
+            }).ConfigureAwait(false);
 
-            this.Message = String.Empty;
-            setIsBusy(false);
-        }
-
-        private void setIsBusy(bool value) {
-            this.IsBusy = value;
-            this.TestConnection.RaiseCanExecuteChanged();
+            SetIsBusy(false);
         }
 
         protected override string OnValidateProperty(string propertyName) {
-            if (changes && String.IsNullOrEmpty(ServerInstance)) {
-                return "Server Instance Required";
-            }
-
+            if (changes && String.IsNullOrEmpty(ServerInstance)) return "Server Instance Required";
             return base.OnValidateProperty(propertyName);
         }
+
+        private bool CanTestConnection() => !IsBusy && !String.IsNullOrEmpty(ServerInstance);
+
+        private async void OnTestConnectionAsync() => await TestDBConnectionAsync();
+
+        private void SetIsBusy(bool value, string message = null) {
+            if (!value) Message = message ?? String.Empty;
+            IsBusy = value;
+            TestConnection.RaiseCanExecuteChanged();
+        }
+
+        public string BuildConnection(string databaseName = "") {
+            var intergrated = String.IsNullOrEmpty(UserName) ? "SSPI" : "False";
+
+            var builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
+
+            if (!String.IsNullOrEmpty(UserName))
+                builder.Append($"User ID={UserName};Password={Password.SecureStringToString()};");
+
+            if (!String.IsNullOrEmpty(databaseName))
+                builder.Append($"Initial Catalog={databaseName};");
+
+            return builder.ToString();
+        }
+
+        #endregion Methods
     }
 }
