@@ -1,2 +1,3 @@
-component_depth: 2
-languages:csharp
+component_depth: 6
+languages:
+- csharp
