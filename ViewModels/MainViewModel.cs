@@ -90,10 +90,7 @@ namespace DataBaseCompare.ViewModels {
         }
 
         private async void OnCopySelectedDatabasesAsync() {
-            IsBusy = true;
-            Message = "";
-            Error = "";
-
+            StartOperation();
             this.CancelationSource = new CancellationTokenSource();
 
             var selectedDatabases = this.Databases.Where(db => db.IsSelected).ToList();
@@ -117,8 +114,6 @@ namespace DataBaseCompare.ViewModels {
                     this.CancelationSource.Cancel();
                 }
             }
-
-            Message = "";
             IsBusy = false;
         }
 

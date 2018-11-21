@@ -60,13 +60,9 @@ namespace DataBaseCompare.Models {
         public override string ToString() => $"{Name}";
 
         internal async Task CopyToAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, bool copyTables, bool copyData, CancellationToken token) {
-            this.IsBusy = true;
-            Error = "";
-
+            StartOperation();
             try {
-                if (destinationDatabases.Any(db => db.Name.Equals(this.Name, StringComparison.InvariantCultureIgnoreCase)))
-                    await EnsureDeletedAsync(destinationConnection, token).ConfigureAwait(false);
-
+                await RemoveIfExists(destinationConnection, destinationDatabases, token);
                 await EnsureCreatedAsync(destinationConnection, token).ConfigureAwait(false);
 
                 if (copyTables) {
@@ -74,11 +70,7 @@ namespace DataBaseCompare.Models {
                         await connection.OpenAsync().ConfigureAwait(false);
                         var transaction = connection.BeginTransaction();
 
-                        transaction = await CopyTablesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
-
-                        transaction = await CopyRoutinesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
-
-                        transaction = await CopyViewsToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+                        transaction = await CopyDatabaseObjects(destinationConnection, copyData, connection, transaction, token);
 
                         if (String.IsNullOrEmpty(Error)) transaction.Commit(); else transaction.Rollback();
 
@@ -89,9 +81,24 @@ namespace DataBaseCompare.Models {
                 this.Error = ex.Message;
                 throw;
             } finally {
-                this.Message = "";
                 this.IsBusy = false;
             }
+        }
+
+        
+
+        private async Task RemoveIfExists(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, CancellationToken token) {
+            if (destinationDatabases.Any(db => db.Name.Equals(this.Name, StringComparison.InvariantCultureIgnoreCase)))
+                await EnsureDeletedAsync(destinationConnection, token).ConfigureAwait(false);
+        }
+
+        private async Task<SqlTransaction> CopyDatabaseObjects(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, SqlTransaction transaction, CancellationToken token) {
+            transaction = await CopyTablesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+
+            transaction = await CopyRoutinesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+
+            transaction = await CopyViewsToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+            return transaction;
         }
 
         private void CleanEnries() {

@@ -1,4 +1,5 @@
 ﻿using Prism.Mvvm;
+using System;
 using System.ComponentModel;
 
 namespace DataBaseCompare.Models {
@@ -42,6 +43,11 @@ namespace DataBaseCompare.Models {
         #region Methods
 
         protected virtual string OnValidateProperty(string propertyName) => string.Empty;
+
+        protected void StartOperation() {
+            this.IsBusy = true;
+            this.Message = Error = String.Empty;
+        }
 
         #endregion Methods
     }
