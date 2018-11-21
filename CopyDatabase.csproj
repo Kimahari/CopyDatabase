@@ -128,6 +128,7 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Models\ConnectionModel.cs" />
+    <Compile Include="Models\CopyToArguments.cs" />
     <Compile Include="Models\DataBaseModel.cs" />
     <Compile Include="Models\ModelBase.cs" />
     <Compile Include="Models\RoutineModel.cs" />
