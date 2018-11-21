@@ -90,7 +90,6 @@ namespace DataBaseCompare.ViewModels {
         }
 
         private async void OnCopySelectedDatabasesAsync() {
-            if (this.CancelationSource.IsCancellationRequested) return;
             StartOperation();
             this.CancelationSource = new CancellationTokenSource();
 
@@ -98,12 +97,12 @@ namespace DataBaseCompare.ViewModels {
 
             var destinationDatabases = await GetConnectionDatabasesAsync(DestinationConnection);
 
-            await copyDatabases(selectedDatabases, destinationDatabases);
+            await CopyDatabasesAsync(selectedDatabases, destinationDatabases);
 
             IsBusy = false;
         }
 
-        private async Task<int> copyDatabases(List<DataBaseModel> selectedDatabases, IEnumerable<DataBaseModel> destinationDatabases) {
+        private async Task<int> CopyDatabasesAsync(List<DataBaseModel> selectedDatabases, IEnumerable<DataBaseModel> destinationDatabases) {
             var counter = 1;
             foreach (var database in selectedDatabases) {
                 if (this.CancelationSource.IsCancellationRequested) break;
@@ -126,24 +125,30 @@ namespace DataBaseCompare.ViewModels {
             await SourceConnection.TestDBConnectionAsync();
 
             this.Databases.Clear();
-            System.Windows.Forms.Application.DoEvents();
 
             var instance = SourceConnection.ServerInstance;
 
             var databases = await GetConnectionDatabasesAsync(SourceConnection);
 
+            LoadDatabases(databases);
+
+            RefreshDatabases(databases);
+
+            this.IsBusy = false;
+        }
+
+        private static void RefreshDatabases(IEnumerable<DataBaseModel> databases) {
+            foreach (var item in databases) {
+                item.RefreshDatabaseTables.Execute();
+            }
+        }
+
+        private void LoadDatabases(IEnumerable<DataBaseModel> databases) {
             foreach (var item in databases) {
                 item.ConnectionModel = SourceConnection;
                 this.Databases.Add(item);
                 System.Windows.Forms.Application.DoEvents();
             }
-
-            foreach (var item in databases) {
-                item.RefreshDatabaseTables.Execute();
-                System.Windows.Forms.Application.DoEvents();
-            }
-
-            this.IsBusy = false;
         }
 
         #endregion Methods

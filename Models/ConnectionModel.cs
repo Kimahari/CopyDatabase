@@ -57,14 +57,11 @@ namespace DataBaseCompare.Models {
         #region Methods
 
         internal async Task TestDBConnectionAsync() {
-            var connectionString = this.BuildConnection();
-
-            SetIsBusy(true);
-            Message = "Teting Connection ...";
+            SetIsBusy(true, "Teting Connection ...");
             ConnectionError = "";
 
             await Task.Factory.StartNew(() => {
-                using (var connection = new SqlConnection(connectionString)) {
+                using (var connection = new SqlConnection(this.BuildConnection())) {
                     try {
                         connection.Open();
                     } catch (Exception ex) {
@@ -85,8 +82,8 @@ namespace DataBaseCompare.Models {
 
         private async void OnTestConnectionAsync() => await TestDBConnectionAsync();
 
-        private void SetIsBusy(bool value) {
-            if (!value) Message = String.Empty;
+        private void SetIsBusy(bool value, string message = null) {
+            if (!value) Message = message ?? String.Empty;
             IsBusy = value;
             TestConnection.RaiseCanExecuteChanged();
         }

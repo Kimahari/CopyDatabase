@@ -18,16 +18,16 @@ namespace DataBaseCompare.Models {
 
         #region Methods
 
-        internal override async Task CopyToAsync(ConnectionModel sourceModel, ConnectionModel destinationModel, string databaseName, bool copyData, CancellationToken token, SqlConnection connection, SqlTransaction transaction, Action<long> callback = null) {
-            await CreateTableAsync(sourceModel, databaseName, connection, transaction, callback);
+        internal override async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) {
+            await CreateTableAsync(args, callback);
 
-            if (copyData) {
+            if (args.CopyData) {
                 await Task.Factory.StartNew(() => {
-                    using (var sourceConnection = new SqlConnection(sourceModel.BuildConnection(databaseName))) {
+                    using (var sourceConnection = new SqlConnection(args.SourceModel.BuildConnection(args.DatabaseName))) {
                         sourceConnection.Open();
                         using (var cmd = new SqlCommand($"SELECT * FROM [{Schema}].[{Name}]", sourceConnection)) {
                             using (var reader = cmd.ExecuteReader()) {
-                                CopyTableData(connection, transaction, reader);
+                                CopyTableData(args.Connection, args.Transaction, reader);
                             }
                         }
                     }
@@ -53,10 +53,10 @@ namespace DataBaseCompare.Models {
             }
         }
 
-        private async Task CreateTableAsync(ConnectionModel sourceModel, string databaseName, SqlConnection connection, SqlTransaction transaction, Action<long> callback) {
-            var sql = await ScriptTableAsync(sourceModel, databaseName);
+        private async Task CreateTableAsync(CopyToArguments args, Action<long> callback) {
+            var sql = await ScriptTableAsync(args.SourceModel, args.DatabaseName);
             CurrentReportCallback = callback;
-            await ExecuteSQL(sql, connection, transaction);
+            await ExecuteSQL(sql, args.Connection, args.Transaction);
         }
 
         private void OnRowsCopied(object sender, SqlRowsCopiedEventArgs e) => CurrentReportCallback?.Invoke(e.RowsCopied);

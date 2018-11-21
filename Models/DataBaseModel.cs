@@ -62,17 +62,18 @@ namespace DataBaseCompare.Models {
         internal async Task CopyToAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, bool copyTables, bool copyData, CancellationToken token) {
             StartOperation();
             try {
-                await RemoveIfExists(destinationConnection, destinationDatabases, token);
+                await RemoveIfExistsAsync(destinationConnection, destinationDatabases, token);
                 await EnsureCreatedAsync(destinationConnection, token).ConfigureAwait(false);
 
                 if (copyTables) {
                     using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
                         await connection.OpenAsync().ConfigureAwait(false);
-                        var transaction = connection.BeginTransaction();
 
-                        transaction = await CopyDatabaseObjects(destinationConnection, copyData, connection, transaction, token);
+                        var copyArguments = CreateArguments(destinationConnection, copyData, connection, token);
 
-                        if (String.IsNullOrEmpty(Error)) transaction.Commit(); else transaction.Rollback();
+                        await CopyDatabaseObjectsAsync(copyArguments);
+
+                        if (String.IsNullOrEmpty(Error)) copyArguments.Transaction.Commit(); else copyArguments.Transaction.Rollback();
 
                         if (!String.IsNullOrEmpty(Error)) throw new Exception(Error);
                     }
@@ -82,23 +83,34 @@ namespace DataBaseCompare.Models {
                 throw;
             } finally {
                 this.IsBusy = false;
+                Message = String.Empty;
             }
         }
 
-        
+        private CopyToArguments CreateArguments(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, CancellationToken token) {
+            return new CopyToArguments {
+                SourceModel = ConnectionModel,
+                DestinationConnection = destinationConnection,
+                CopyData = copyData,
+                Connection = connection,
+                Transaction = connection.BeginTransaction(),
+                Token = token,
+                DatabaseName = Name
+            };
+        }
 
-        private async Task RemoveIfExists(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, CancellationToken token) {
+
+        private async Task RemoveIfExistsAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, CancellationToken token) {
             if (destinationDatabases.Any(db => db.Name.Equals(this.Name, StringComparison.InvariantCultureIgnoreCase)))
                 await EnsureDeletedAsync(destinationConnection, token).ConfigureAwait(false);
         }
 
-        private async Task<SqlTransaction> CopyDatabaseObjects(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, SqlTransaction transaction, CancellationToken token) {
-            transaction = await CopyTablesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+        private async Task CopyDatabaseObjectsAsync(CopyToArguments args) {
+            await CopyTablesToDestinationAsync(args).ConfigureAwait(false);
 
-            transaction = await CopyRoutinesToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
+            await CopyRoutinesToDestinationAsync(args).ConfigureAwait(false);
 
-            transaction = await CopyViewsToDestinationAsync(destinationConnection, copyData, connection, transaction, token).ConfigureAwait(false);
-            return transaction;
+            await CopyViewsToDestinationAsync(args).ConfigureAwait(false);
         }
 
         private void CleanEnries() {
@@ -107,36 +119,38 @@ namespace DataBaseCompare.Models {
             Routines.Clear();
         }
 
-        private SqlTransaction CommitTransactionIfNoErrors(SqlConnection connection, SqlTransaction transaction) {
+        private void CommitTransactionIfNoErrors(CopyToArguments args) {
             if (String.IsNullOrEmpty(Error)) {
-                transaction.Commit();
-                transaction = connection.BeginTransaction();
+                args.Transaction.Commit();
+                args.Transaction = args.Connection.BeginTransaction();
             }
-
-            return transaction;
         }
 
-        private async Task<SqlTransaction> CopyRoutinesToDestinationAsync(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, SqlTransaction transaction, CancellationToken token) {
+
+
+        private async Task CopyRoutinesToDestinationAsync(CopyToArguments args) {
             try {
                 foreach (var routine in Routines) {
                     if (!String.IsNullOrEmpty(Error)) break;
                     this.Message = $"Copying ({routine.Type}) {routine.Name}";
-                    try {
-                        await routine.CopyToAsync(this.ConnectionModel, destinationConnection, name, copyData, token, connection, transaction).ConfigureAwait(false);
-                    } catch (Exception ex) {
-                        this.Error = $"Faled to copy ({routine.Type}) [{routine.Name}] - {ex.Message}";
-                    }
+                    await CopyDatabaseObjectToAsync(routine, args);
                 }
 
-                transaction = CommitTransactionIfNoErrors(connection, transaction);
+                CommitTransactionIfNoErrors(args);
             } catch (Exception ex) {
                 this.Error = ex.Message;
             }
-
-            return transaction;
         }
 
-        private async Task<SqlTransaction> CopyTablesToDestinationAsync(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, SqlTransaction transaction, CancellationToken token) {
+        private async Task CopyDatabaseObjectToAsync(ScriptedModel Model, CopyToArguments args) {
+            try {
+                await Model.CopyToAsync(args).ConfigureAwait(false);
+            } catch (Exception ex) {
+                this.Error = $"Faled to copy {Model} - {ex.Message}";
+            }
+        }
+
+        private async Task CopyTablesToDestinationAsync(CopyToArguments args) {
             try {
                 var tableCount = Tables.Count;
                 var counter = 1;
@@ -145,7 +159,7 @@ namespace DataBaseCompare.Models {
                     if (!String.IsNullOrEmpty(Error)) break;
                     this.Message = $"Copying Table {counter} of {tableCount} ({table.Name})";
                     try {
-                        await table.CopyToAsync(this.ConnectionModel, destinationConnection, name, copyData, token, connection, transaction, (rows) => {
+                        await table.CopyToAsync(args, (rows) => {
                             this.Message = $"Copying Table {counter} of {tableCount} ({table.Name}) - ({rows} Rows Copied) ";
                         }).ConfigureAwait(false);
                         counter++;
@@ -154,32 +168,24 @@ namespace DataBaseCompare.Models {
                     }
                 }
 
-                transaction = CommitTransactionIfNoErrors(connection, transaction);
+                CommitTransactionIfNoErrors(args);
             } catch (Exception ex) {
                 this.Error = ex.Message;
             }
-
-            return transaction;
         }
 
-        private async Task<SqlTransaction> CopyViewsToDestinationAsync(ConnectionModel destinationConnection, bool copyData, SqlConnection connection, SqlTransaction transaction, CancellationToken token) {
+        private async Task CopyViewsToDestinationAsync(CopyToArguments args) {
             try {
                 foreach (var view in Views) {
                     if (!String.IsNullOrEmpty(Error)) break;
                     this.Message = $"Copying View {view.Name}";
-                    try {
-                        await view.CopyToAsync(this.ConnectionModel, destinationConnection, name, copyData, token, connection, transaction).ConfigureAwait(false);
-                    } catch (Exception ex) {
-                        this.Error = $"Faled to copy View [{view.Name}] - {ex.Message}";
-                    }
+                    await CopyDatabaseObjectToAsync(view, args);
                 }
 
-                transaction = CommitTransactionIfNoErrors(connection, transaction);
+                CommitTransactionIfNoErrors(args);
             } catch (Exception ex) {
                 this.Error = ex.Message;
             }
-
-            return transaction;
         }
 
         private async Task EnsureCreatedAsync(ConnectionModel destinationConnection, CancellationToken token) {
@@ -190,14 +196,18 @@ namespace DataBaseCompare.Models {
                     using (var cmd = new SqlCommand($@"CREATE DATABASE [{Name}]", connection)) cmd.ExecuteNonQuery();
                 }
 
-                foreach (var schema in Tables.GroupBy(ii => ii.Schema).Select(ii => ii.Key)) {
-                    if (schema == "dbo") continue;
-                    using (var connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
-                        connection.Open();
-                        using (var cmd = new SqlCommand($@"CREATE SCHEMA [{schema}]", connection)) cmd.ExecuteNonQuery();
-                    }
-                }
+                EnsureSchemasCreated(destinationConnection);
             }).ConfigureAwait(false);
+        }
+
+        private void EnsureSchemasCreated(ConnectionModel destinationConnection) {
+            foreach (var schema in Tables.GroupBy(ii => ii.Schema).Select(ii => ii.Key)) {
+                if (schema == "dbo") continue;
+                using (var connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
+                    connection.Open();
+                    using (var cmd = new SqlCommand($@"CREATE SCHEMA [{schema}]", connection)) cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         private async Task EnsureDeletedAsync(ConnectionModel destinationConnection, CancellationToken token) {

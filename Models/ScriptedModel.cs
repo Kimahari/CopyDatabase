@@ -6,6 +6,19 @@ using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
 
+    public class CopyToArguments {
+        public ConnectionModel SourceModel { get; internal set; }
+        public ConnectionModel DestinationConnection { get; internal set; }
+        public bool CopyData { get; internal set; }
+
+        public CancellationToken Token { get; internal set; }
+
+        public String DatabaseName { get; internal set; }
+
+        public SqlConnection Connection { get; internal set; }
+        public SqlTransaction Transaction { get; internal set; }
+    }
+
     public class ScriptedModel : ModelBase {
 
         #region Properties
@@ -19,7 +32,7 @@ namespace DataBaseCompare.Models {
 
         #region Methods
 
-        internal virtual async Task CopyToAsync(ConnectionModel sourceModel, ConnectionModel destinationModel, String databaseName, bool copyData, CancellationToken token, SqlConnection connection, SqlTransaction transaction, Action<long> callback = null) => await ExecuteSQL(Script, connection, transaction);
+        internal virtual async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) => await ExecuteSQL(Script, args.Connection, args.Transaction);
 
         protected static ConfiguredTaskAwaitable ExecuteSQL(string sql, SqlConnection connection, SqlTransaction transaction) => Task.Factory.StartNew(() => {
             using (var command = new SqlCommand(sql, connection, transaction)) {

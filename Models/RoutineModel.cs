@@ -7,5 +7,7 @@
         public string Type { get; set; }
 
         #endregion Properties
+
+        public override string ToString() => $"({Type}) - [{Name}]";
     }
 }
