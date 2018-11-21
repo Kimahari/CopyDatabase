@@ -2,55 +2,33 @@
 using DataBaseCompare.Models;
 using DataBaseCompare.Tools;
 using Prism.Commands;
-using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace DataBaseCompare.ViewModels {
+
     public class MainViewModel : ModelBase {
-        private string title = "Copy Databases";
 
-        public string Title {
-            get { return title; }
-            set {
-                SetProperty(ref title, value);
-            }
-        }
-
-        private bool copyTables = true;
-
-        public bool CopyTables {
-            get { return copyTables; }
-            set { SetProperty(ref copyTables, value); }
-        }
+        #region Fields
 
         private bool copyData = true;
+        private bool copyTables = true;
+        private string title = "Copy Databases";
 
-        public bool CopyData {
-            get { return copyData; }
-            set { SetProperty(ref copyData, value); }
-        }
+        #endregion Fields
 
-        public ConnectionModel SourceConnection { get; }
-        public ConnectionModel DestinationConnection { get; }
-        public DelegateCommand LoadSourceDatabases { get; }
-        public DelegateCommand CopySelectedDatabases { get; }
-        public DelegateCommand SelectAll { get; }
-        public ObservableCollection<DataBaseModel> Databases { get; set; } = new ObservableCollection<DataBaseModel>();
-        public CancellationTokenSource CancelationSource { get; private set; }
+        #region Constructors
 
         public MainViewModel() {
-            this.SourceConnection = new ConnectionModel() { ServerInstance = @".\SQLExpress16" };
-            this.DestinationConnection = new ConnectionModel() { ServerInstance = @".\SQLExpress" };
-            this.LoadSourceDatabases = new DelegateCommand(onLoadSourceTables);
-            this.CopySelectedDatabases = new DelegateCommand(onCopySelectedDatabases);
+            this.SourceConnection = new ConnectionModel { ServerInstance = @".\SQLExpress16" };
+            this.DestinationConnection = new ConnectionModel { ServerInstance = @".\SQLExpress" };
+            this.LoadSourceDatabases = new DelegateCommand(OnLoadSourceTablesAsync);
+            this.CopySelectedDatabases = new DelegateCommand(OnCopySelectedDatabasesAsync);
             this.SelectAll = new DelegateCommand(() => {
                 foreach (var item in Databases) {
                     item.IsSelected = true;
@@ -58,41 +36,60 @@ namespace DataBaseCompare.ViewModels {
             });
         }
 
-        private async void onLoadSourceTables() {
-            this.IsBusy = true;
+        #endregion Constructors
 
-            Parallel.ForEach(new[] { SourceConnection, DestinationConnection }, async (conn) => {
-                await conn.TestDBConnection();
-                System.Windows.Forms.Application.DoEvents();
-            });
+        #region Properties
 
-            this.Databases.Clear();
-            System.Windows.Forms.Application.DoEvents();
+        public CancellationTokenSource CancelationSource { get; private set; }
 
-            var instance = SourceConnection.ServerInstance;
-
-            IEnumerable<DataBaseModel> databases = await GetConnectionDatabases(SourceConnection);
-
-            foreach (var item in databases) {
-                System.Windows.Forms.Application.DoEvents();
-                item.ConnectionModel = SourceConnection;
-                System.Windows.Forms.Application.DoEvents();
-                this.Databases.Add(item);
-                //Thread.Sleep(1);
-                System.Windows.Forms.Application.DoEvents();
-            }
-
-            foreach (var item in databases) {
-                System.Windows.Forms.Application.DoEvents();
-                item.RefreshDatabaseTables.Execute();
-                System.Windows.Forms.Application.DoEvents();
-                //Thread.Sleep(1);
-            }
-
-            this.IsBusy = false;
+        public bool CopyData {
+            get => copyData;
+            set => SetProperty(ref copyData, value);
         }
 
-        private async void onCopySelectedDatabases() {
+        public DelegateCommand CopySelectedDatabases { get; }
+
+        public bool CopyTables {
+            get => copyTables;
+            set => SetProperty(ref copyTables, value);
+        }
+
+        public ObservableCollection<DataBaseModel> Databases { get; set; } = new ObservableCollection<DataBaseModel>();
+
+        public ConnectionModel DestinationConnection { get; }
+
+        public DelegateCommand LoadSourceDatabases { get; }
+
+        public DelegateCommand SelectAll { get; }
+
+        public ConnectionModel SourceConnection { get; }
+
+        public string Title {
+            get => title;
+            set => SetProperty(ref title, value);
+        }
+
+        #endregion Properties
+
+        #region Methods
+
+        private async Task<IEnumerable<DataBaseModel>> GetConnectionDatabasesAsync(ConnectionModel con) {
+            try {
+                return await Task<IEnumerable<DataBaseModel>>.Factory.StartNew(() => {
+                    using (var connection = new SqlConnection(con.BuildConnection())) {
+                        connection.Open();
+                        const string sql = @"SELECT name FROM sys.Databases WHERE name not in ('master','tempdb','model','msdb')";
+                        return connection.Query<DataBaseModel>(sql);
+                    }
+                });
+            } catch (Exception ex) {
+                this.Error = ex.Message;
+                this.CancelationSource.Cancel();
+                return new List<DataBaseModel>();
+            }
+        }
+
+        private async void OnCopySelectedDatabasesAsync() {
             IsBusy = true;
             Message = "";
             Error = "";
@@ -103,7 +100,7 @@ namespace DataBaseCompare.ViewModels {
 
             if (this.CancelationSource.IsCancellationRequested) return;
 
-            var destinationDatabases = await GetConnectionDatabases(DestinationConnection);
+            var destinationDatabases = await GetConnectionDatabasesAsync(DestinationConnection);
 
             if (this.CancelationSource.IsCancellationRequested) return;
 
@@ -113,7 +110,7 @@ namespace DataBaseCompare.ViewModels {
                 if (this.CancelationSource.IsCancellationRequested) break;
                 Message = $"Copying {counter} from {selectedDatabases.Count} ({database.Name})";
                 try {
-                    await database.CopyTo(DestinationConnection, destinationDatabases, this.copyData, this.copyTables, CancelationSource.Token);
+                    await database.CopyToAsync(DestinationConnection, destinationDatabases, this.copyData, this.copyTables, CancelationSource.Token);
                     counter++;
                 } catch (Exception ex) {
                     Error = ex.Message;
@@ -125,23 +122,32 @@ namespace DataBaseCompare.ViewModels {
             IsBusy = false;
         }
 
-        private async Task<IEnumerable<DataBaseModel>> GetConnectionDatabases(ConnectionModel con) {
-            try {
-                return await Task<IEnumerable<DataBaseModel>>.Factory.StartNew(() => {
-                    using (var connection = new SqlConnection(con.BuildConnection())) {
-                        connection.Open();
-                        var sql = @"SELECT name FROM sys.Databases WHERE name not in ('master','tempdb','model','msdb')";
-                        return connection.Query<DataBaseModel>(sql);
-                    }
-                });
-            } catch (Exception ex) {
-                this.Error = ex.Message;
-                this.CancelationSource.Cancel();
-                return new List<DataBaseModel>();
+        private async void OnLoadSourceTablesAsync() {
+            this.IsBusy = true;
+
+            await SourceConnection.TestDBConnectionAsync();
+
+            this.Databases.Clear();
+            System.Windows.Forms.Application.DoEvents();
+
+            var instance = SourceConnection.ServerInstance;
+
+            var databases = await GetConnectionDatabasesAsync(SourceConnection);
+
+            foreach (var item in databases) {
+                item.ConnectionModel = SourceConnection;
+                this.Databases.Add(item);
+                System.Windows.Forms.Application.DoEvents();
             }
 
+            foreach (var item in databases) {
+                item.RefreshDatabaseTables.Execute();
+                System.Windows.Forms.Application.DoEvents();
+            }
+
+            this.IsBusy = false;
         }
 
-
+        #endregion Methods
     }
 }

@@ -1,45 +1,48 @@
 ﻿using Prism.Mvvm;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
+
     public abstract class ModelBase : BindableBase, IDataErrorInfo {
 
-        private bool isBusy;
+        #region Fields
 
-        public bool IsBusy {
-            get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
-        }
+        private string error;
+        private bool isBusy;
 
         private string message;
 
-        public string Message {
-            get { return message; }
-            set { SetProperty(ref message, value); }
-        }
+        #endregion Fields
 
-
-        private string error;
+        #region Properties
 
         public string Error {
-            get { return error; }
-            set { SetProperty(ref error, value); }
+            get => error;
+            set => SetProperty(ref error, value);
         }
 
+        public bool IsBusy {
+            get => isBusy;
+            set => SetProperty(ref isBusy, value);
+        }
+
+        public string Message {
+            get => message;
+            set => SetProperty(ref message, value);
+        }
+
+        #endregion Properties
+
+        #region Indexers
 
         public string this[string columnName] => OnValidateProperty(columnName);
 
-        public ModelBase() {
+        #endregion Indexers
 
-        }
+        #region Methods
 
-        protected virtual string OnValidateProperty(string propertyName) {
-            return string.Empty;
-        }
+        protected virtual string OnValidateProperty(string propertyName) => string.Empty;
+
+        #endregion Methods
     }
 }

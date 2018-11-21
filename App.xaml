@@ -6,8 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                
-                
+
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
@@ -19,22 +18,22 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
 
                 <ResourceDictionary>
-                    <SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource Primary700}"/>
+                    <SolidColorBrush x:Key="HighlightBrush" Color="{DynamicResource Primary700}" />
                     <SolidColorBrush x:Key="AccentBaseColorBrush" Color="{DynamicResource Primary600}" />
-                    <SolidColorBrush x:Key="AccentColorBrush" Color="{DynamicResource Primary500}"/>
-                    <SolidColorBrush x:Key="AccentColorBrush2" Color="{DynamicResource Primary400}"/>
-                    <SolidColorBrush x:Key="AccentColorBrush3" Color="{DynamicResource Primary300}"/>
-                    <SolidColorBrush x:Key="AccentColorBrush4" Color="{DynamicResource Primary200}"/>
-                    <SolidColorBrush x:Key="WindowTitleColorBrush" Color="{DynamicResource Primary700}"/>
-                    <SolidColorBrush x:Key="AccentSelectedColorBrush" Color="{DynamicResource Primary500Foreground}"/>
+                    <SolidColorBrush x:Key="AccentColorBrush" Color="{DynamicResource Primary500}" />
+                    <SolidColorBrush x:Key="AccentColorBrush2" Color="{DynamicResource Primary400}" />
+                    <SolidColorBrush x:Key="AccentColorBrush3" Color="{DynamicResource Primary300}" />
+                    <SolidColorBrush x:Key="AccentColorBrush4" Color="{DynamicResource Primary200}" />
+                    <SolidColorBrush x:Key="WindowTitleColorBrush" Color="{DynamicResource Primary700}" />
+                    <SolidColorBrush x:Key="AccentSelectedColorBrush" Color="{DynamicResource Primary500Foreground}" />
                     <LinearGradientBrush x:Key="ProgressBrush" EndPoint="0.001,0.5" StartPoint="1.002,0.5">
-                        <GradientStop Color="{DynamicResource Primary700}" Offset="0"/>
-                        <GradientStop Color="{DynamicResource Primary300}" Offset="1"/>
+                        <GradientStop Color="{DynamicResource Primary700}" Offset="0" />
+                        <GradientStop Color="{DynamicResource Primary300}" Offset="1" />
                     </LinearGradientBrush>
-                    <SolidColorBrush x:Key="CheckmarkFill" Color="{DynamicResource Primary500}"/>
-                    <SolidColorBrush x:Key="RightArrowFill" Color="{DynamicResource Primary500}"/>
-                    <SolidColorBrush x:Key="IdealForegroundColorBrush" Color="{DynamicResource Primary500Foreground}"/>
-                    <SolidColorBrush x:Key="IdealForegroundDisabledBrush" Color="{DynamicResource Primary500}" Opacity="0.4"/>
+                    <SolidColorBrush x:Key="CheckmarkFill" Color="{DynamicResource Primary500}" />
+                    <SolidColorBrush x:Key="RightArrowFill" Color="{DynamicResource Primary500}" />
+                    <SolidColorBrush x:Key="IdealForegroundColorBrush" Color="{DynamicResource Primary500Foreground}" />
+                    <SolidColorBrush x:Key="IdealForegroundDisabledBrush" Color="{DynamicResource Primary500}" Opacity="0.4" />
                     <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchBrush.Win10" Color="{DynamicResource Primary500}" />
                     <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchMouseOverBrush.Win10" Color="{DynamicResource Primary400}" />
                     <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.ThumbIndicatorCheckedBrush.Win10" Color="{DynamicResource Primary500Foreground}" />
@@ -43,13 +42,13 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <converters:BooleanToVisibilityConverter x:Key="HiddenIfTrue" TriggerValue="True" IsHidden="True"/>
-            <converters:BooleanToVisibilityConverter x:Key="HiddenIfFalse" TriggerValue="False" IsHidden="True"/>
-            <converters:BooleanToVisibilityConverter x:Key="CollapsedIfTrue" TriggerValue="True" IsHidden="False"/>
-            <converters:BooleanToVisibilityConverter x:Key="CollapsedIfFalse" TriggerValue="False" IsHidden="False"/>
+            <converters:BooleanToVisibilityConverter x:Key="HiddenIfTrue" TriggerValue="True" IsHidden="True" />
+            <converters:BooleanToVisibilityConverter x:Key="HiddenIfFalse" TriggerValue="False" IsHidden="True" />
+            <converters:BooleanToVisibilityConverter x:Key="CollapsedIfTrue" TriggerValue="True" IsHidden="False" />
+            <converters:BooleanToVisibilityConverter x:Key="CollapsedIfFalse" TriggerValue="False" IsHidden="False" />
 
-            <converters:HasValueConverter x:Key="HasValue"/>
-            <converters:SecureStringValueConverter x:Key="SecureValue"/>
+            <converters:HasValueConverter x:Key="HasValue" />
+            <converters:SecureStringValueConverter x:Key="SecureValue" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
