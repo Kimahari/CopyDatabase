@@ -3,6 +3,7 @@ using Prism.Commands;
 using System;
 using System.Data.SqlClient;
 using System.Security;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
@@ -88,6 +89,20 @@ namespace DataBaseCompare.Models {
             if (!value) Message = String.Empty;
             IsBusy = value;
             TestConnection.RaiseCanExecuteChanged();
+        }
+
+        public string BuildConnection(string databaseName = "") {
+            var intergrated = String.IsNullOrEmpty(UserName) ? "SSPI" : "False";
+
+            var builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
+
+            if (!String.IsNullOrEmpty(UserName))
+                builder.Append($"User ID={UserName};Password={Password.SecureStringToString()};");
+
+            if (!String.IsNullOrEmpty(databaseName))
+                builder.Append($"Initial Catalog={databaseName};");
+
+            return builder.ToString();
         }
 
         #endregion Methods
