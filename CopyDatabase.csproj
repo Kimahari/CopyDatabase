@@ -134,6 +134,7 @@
     <Compile Include="Models\RoutineModel.cs" />
     <Compile Include="Models\ScriptedModel.cs" />
     <Compile Include="Models\TableModel.cs" />
+    <Compile Include="Tools\Constants.cs" />
     <Compile Include="Tools\Extensions.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\ConnectionView.xaml.cs">
