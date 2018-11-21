@@ -154,15 +154,14 @@ namespace DataBaseCompare.Models {
 
         private async Task CopyTablesToDestinationAsync(CopyToArguments args) {
             try {
-                var tableCount = Tables.Count;
                 var counter = 1;
 
                 foreach (var table in Tables) {
                     if (!String.IsNullOrEmpty(Error)) break;
-                    this.Message = $"Copying Table {counter} of {tableCount} ({table.Name})";
+                    this.Message = $"Copying Table {counter} of {Tables.Count} ({table.Name})";
                     try {
                         await table.CopyToAsync(args, (rows) => {
-                            this.Message = $"Copying Table {counter} of {tableCount} ({table.Name}) - ({rows} Rows Copied) ";
+                            this.Message = $"Copying Table {counter} of {Tables.Count} ({table.Name}) - ({rows} Rows Copied) ";
                         }).ConfigureAwait(false);
                         counter++;
                     } catch (Exception ex) {
