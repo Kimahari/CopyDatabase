@@ -90,19 +90,21 @@ namespace DataBaseCompare.ViewModels {
         }
 
         private async void OnCopySelectedDatabasesAsync() {
+            if (this.CancelationSource.IsCancellationRequested) return;
             StartOperation();
             this.CancelationSource = new CancellationTokenSource();
 
             var selectedDatabases = this.Databases.Where(db => db.IsSelected).ToList();
 
-            if (this.CancelationSource.IsCancellationRequested) return;
-
             var destinationDatabases = await GetConnectionDatabasesAsync(DestinationConnection);
 
-            if (this.CancelationSource.IsCancellationRequested) return;
+            await copyDatabases(selectedDatabases, destinationDatabases);
 
+            IsBusy = false;
+        }
+
+        private async Task<int> copyDatabases(List<DataBaseModel> selectedDatabases, IEnumerable<DataBaseModel> destinationDatabases) {
             var counter = 1;
-
             foreach (var database in selectedDatabases) {
                 if (this.CancelationSource.IsCancellationRequested) break;
                 Message = $"Copying {counter} from {selectedDatabases.Count} ({database.Name})";
@@ -114,7 +116,8 @@ namespace DataBaseCompare.ViewModels {
                     this.CancelationSource.Cancel();
                 }
             }
-            IsBusy = false;
+
+            return counter;
         }
 
         private async void OnLoadSourceTablesAsync() {
