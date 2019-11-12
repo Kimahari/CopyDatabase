@@ -7,10 +7,12 @@ namespace DataBaseCompare.Views {
     /// </summary>
     public partial class ConnectionView : UserControl {
 
-        #region Constructors
+        #region Public Constructors
 
-        public ConnectionView() => InitializeComponent();
+        public ConnectionView() {
+            InitializeComponent();
+        }
 
-        #endregion Constructors
+        #endregion Public Constructors
     }
 }

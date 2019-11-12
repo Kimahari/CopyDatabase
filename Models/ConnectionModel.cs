@@ -10,18 +10,71 @@ namespace DataBaseCompare.Models {
 
     public class ConnectionModel : ModelBase {
 
-        #region Fields
+        #region Private Fields
 
-        internal string serverInstance;
         private bool changes;
         private string connectionError;
         private SecureString password;
         private bool showConfiguration;
         private string userName;
 
-        #endregion Fields
+        #endregion Private Fields
 
-        #region Constructors
+        #region Private Methods
+
+        private bool CanTestConnection() {
+            return !IsBusy && !String.IsNullOrEmpty(ServerInstance);
+        }
+
+        private async void OnTestConnectionAsync() {
+            await TestDBConnectionAsync();
+        }
+
+        private void SetIsBusy(bool value, string message = null) {
+            if (!value) Message = message ?? String.Empty;
+            IsBusy = value;
+            TestConnection.RaiseCanExecuteChanged();
+        }
+
+        #endregion Private Methods
+
+        #region Protected Methods
+
+        protected override string OnValidateProperty(string propertyName) {
+            if (changes && String.IsNullOrEmpty(ServerInstance)) return "Server Instance Required";
+            return base.OnValidateProperty(propertyName);
+        }
+
+        #endregion Protected Methods
+
+        #region Internal Fields
+
+        internal string serverInstance;
+
+        #endregion Internal Fields
+
+        #region Internal Methods
+
+        internal async Task TestDBConnectionAsync() {
+            SetIsBusy(true, "Teting Connection ...");
+            ConnectionError = "";
+
+            await Task.Factory.StartNew(() => {
+                using (SqlConnection connection = new SqlConnection(BuildConnection())) {
+                    try {
+                        connection.Open();
+                    } catch (Exception ex) {
+                        ConnectionError = ex.Message;
+                    }
+                }
+            }).ConfigureAwait(false);
+
+            SetIsBusy(false);
+        }
+
+        #endregion Internal Methods
+
+        #region Public Constructors
 
         public ConnectionModel() {
             TestConnection = new DelegateCommand(OnTestConnectionAsync, CanTestConnection);
@@ -30,9 +83,9 @@ namespace DataBaseCompare.Models {
             });
         }
 
-        #endregion Constructors
+        #endregion Public Constructors
 
-        #region Properties
+        #region Public Properties
 
         public string ConnectionError { get => connectionError; set => SetProperty(ref connectionError, value); }
 
@@ -52,46 +105,14 @@ namespace DataBaseCompare.Models {
 
         public string UserName { get => userName; set => SetProperty(ref userName, value); }
 
-        #endregion Properties
+        #endregion Public Properties
 
-        #region Methods
-
-        internal async Task TestDBConnectionAsync() {
-            SetIsBusy(true, "Teting Connection ...");
-            ConnectionError = "";
-
-            await Task.Factory.StartNew(() => {
-                using (var connection = new SqlConnection(this.BuildConnection())) {
-                    try {
-                        connection.Open();
-                    } catch (Exception ex) {
-                        ConnectionError = ex.Message;
-                    }
-                }
-            }).ConfigureAwait(false);
-
-            SetIsBusy(false);
-        }
-
-        protected override string OnValidateProperty(string propertyName) {
-            if (changes && String.IsNullOrEmpty(ServerInstance)) return "Server Instance Required";
-            return base.OnValidateProperty(propertyName);
-        }
-
-        private bool CanTestConnection() => !IsBusy && !String.IsNullOrEmpty(ServerInstance);
-
-        private async void OnTestConnectionAsync() => await TestDBConnectionAsync();
-
-        private void SetIsBusy(bool value, string message = null) {
-            if (!value) Message = message ?? String.Empty;
-            IsBusy = value;
-            TestConnection.RaiseCanExecuteChanged();
-        }
+        #region Public Methods
 
         public string BuildConnection(string databaseName = "") {
-            var intergrated = String.IsNullOrEmpty(UserName) ? "SSPI" : "False";
+            string intergrated = String.IsNullOrEmpty(UserName) ? "SSPI" : "False";
 
-            var builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
+            StringBuilder builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
 
             if (!String.IsNullOrEmpty(UserName))
                 builder.Append($"User ID={UserName};Password={Password.SecureStringToString()};");
@@ -102,6 +123,6 @@ namespace DataBaseCompare.Models {
             return builder.ToString();
         }
 
-        #endregion Methods
+        #endregion Public Methods
     }
 }

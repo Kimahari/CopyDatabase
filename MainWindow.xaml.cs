@@ -7,10 +7,12 @@ namespace DataBaseCompare {
     /// </summary>
     public partial class MainWindow : MetroWindow {
 
-        #region Constructors
+        #region Public Constructors
 
-        public MainWindow() => InitializeComponent();
+        public MainWindow() {
+            InitializeComponent();
+        }
 
-        #endregion Constructors
+        #endregion Public Constructors
     }
 }

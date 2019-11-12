@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace DataBaseCompare.Tools {
 
-namespace DataBaseCompare.Tools {
     public class Constants {
+
+        #region Public Fields
 
         public const string CreateTableScript = @"
 DECLARE @table_name SYSNAME
@@ -152,5 +149,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
     ), '')
 
 SELECT @SQL";
+
+        #endregion Public Fields
     }
 }

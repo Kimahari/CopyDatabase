@@ -1,19 +1,17 @@
-﻿using DataBaseCompare.Models;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 
 namespace DataBaseCompare.Tools {
 
     public static class Extensions {
 
-        #region Methods
+        #region Public Methods
 
         public static String SecureStringToString(this SecureString value) {
             if (value == null) return string.Empty;
 
-            var valuePtr = IntPtr.Zero;
+            IntPtr valuePtr = IntPtr.Zero;
 
             try {
                 valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
@@ -24,7 +22,7 @@ namespace DataBaseCompare.Tools {
         }
 
         public static SecureString ToSecureString(this string @string) {
-            var secure = new SecureString();
+            SecureString secure = new SecureString();
             foreach (char c in @string) {
                 secure.AppendChar(c);
             }
@@ -32,6 +30,6 @@ namespace DataBaseCompare.Tools {
             return secure;
         }
 
-        #endregion Methods
+        #endregion Public Methods
     }
 }

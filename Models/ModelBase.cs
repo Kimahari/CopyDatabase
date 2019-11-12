@@ -6,16 +6,29 @@ namespace DataBaseCompare.Models {
 
     public abstract class ModelBase : BindableBase, IDataErrorInfo {
 
-        #region Fields
+        #region Private Fields
 
         private string error;
         private bool isBusy;
 
         private string message;
 
-        #endregion Fields
+        #endregion Private Fields
 
-        #region Properties
+        #region Protected Methods
+
+        protected virtual string OnValidateProperty(string propertyName) {
+            return string.Empty;
+        }
+
+        protected void StartOperation() {
+            IsBusy = true;
+            Message = Error = String.Empty;
+        }
+
+        #endregion Protected Methods
+
+        #region Public Properties
 
         public string Error {
             get => error;
@@ -32,23 +45,12 @@ namespace DataBaseCompare.Models {
             set => SetProperty(ref message, value);
         }
 
-        #endregion Properties
+        #endregion Public Properties
 
-        #region Indexers
+        #region Public Indexers
 
         public string this[string columnName] => OnValidateProperty(columnName);
 
-        #endregion Indexers
-
-        #region Methods
-
-        protected virtual string OnValidateProperty(string propertyName) => string.Empty;
-
-        protected void StartOperation() {
-            this.IsBusy = true;
-            this.Message = Error = String.Empty;
-        }
-
-        #endregion Methods
+        #endregion Public Indexers
     }
 }

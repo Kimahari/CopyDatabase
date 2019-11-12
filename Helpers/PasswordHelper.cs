@@ -5,40 +5,15 @@ namespace DataBaseCompare.Helpers {
 
     public static class PasswordHelper {
 
-        #region Fields
-
-        public static readonly DependencyProperty AttachProperty =
-            DependencyProperty.RegisterAttached("Attach",
-            typeof(bool), typeof(PasswordHelper), new PropertyMetadata(false, Attach));
-
-        public static readonly DependencyProperty PasswordProperty =
-                    DependencyProperty.RegisterAttached("Password",
-            typeof(string), typeof(PasswordHelper),
-            new FrameworkPropertyMetadata(string.Empty, OnPasswordPropertyChanged));
+        #region Private Fields
 
         private static readonly DependencyProperty IsUpdatingProperty =
            DependencyProperty.RegisterAttached("IsUpdating", typeof(bool),
            typeof(PasswordHelper));
 
-        #endregion Fields
+        #endregion Private Fields
 
-        #region Methods
-
-        public static bool GetAttach(DependencyObject dp) {
-            return (bool) dp.GetValue(AttachProperty);
-        }
-
-        public static string GetPassword(DependencyObject dp) {
-            return (string) dp.GetValue(PasswordProperty);
-        }
-
-        public static void SetAttach(DependencyObject dp, bool value) {
-            dp.SetValue(AttachProperty, value);
-        }
-
-        public static void SetPassword(DependencyObject dp, string value) {
-            dp.SetValue(PasswordProperty, value);
-        }
+        #region Private Methods
 
         private static void Attach(DependencyObject sender,
             DependencyPropertyChangedEventArgs e) {
@@ -47,17 +22,17 @@ namespace DataBaseCompare.Helpers {
             if (passwordBox == null)
                 return;
 
-            if ((bool) e.OldValue) {
+            if ((bool)e.OldValue) {
                 passwordBox.PasswordChanged -= PasswordChanged;
             }
 
-            if ((bool) e.NewValue) {
+            if ((bool)e.NewValue) {
                 passwordBox.PasswordChanged += PasswordChanged;
             }
         }
 
         private static bool GetIsUpdating(DependencyObject dp) {
-            return (bool) dp.GetValue(IsUpdatingProperty);
+            return (bool)dp.GetValue(IsUpdatingProperty);
         }
 
         private static void OnPasswordPropertyChanged(DependencyObject sender,
@@ -65,8 +40,8 @@ namespace DataBaseCompare.Helpers {
             PasswordBox passwordBox = sender as PasswordBox;
             passwordBox.PasswordChanged -= PasswordChanged;
 
-            if (!(bool) GetIsUpdating(passwordBox)) {
-                passwordBox.Password = (string) e.NewValue;
+            if (!(bool)GetIsUpdating(passwordBox)) {
+                passwordBox.Password = (string)e.NewValue;
             }
             passwordBox.PasswordChanged += PasswordChanged;
         }
@@ -82,6 +57,39 @@ namespace DataBaseCompare.Helpers {
             dp.SetValue(IsUpdatingProperty, value);
         }
 
-        #endregion Methods
+        #endregion Private Methods
+
+        #region Public Fields
+
+        public static readonly DependencyProperty AttachProperty =
+                                                            DependencyProperty.RegisterAttached("Attach",
+            typeof(bool), typeof(PasswordHelper), new PropertyMetadata(false, Attach));
+
+        public static readonly DependencyProperty PasswordProperty =
+                    DependencyProperty.RegisterAttached("Password",
+            typeof(string), typeof(PasswordHelper),
+            new FrameworkPropertyMetadata(string.Empty, OnPasswordPropertyChanged));
+
+        #endregion Public Fields
+
+        #region Public Methods
+
+        public static bool GetAttach(DependencyObject dp) {
+            return (bool)dp.GetValue(AttachProperty);
+        }
+
+        public static string GetPassword(DependencyObject dp) {
+            return (string)dp.GetValue(PasswordProperty);
+        }
+
+        public static void SetAttach(DependencyObject dp, bool value) {
+            dp.SetValue(AttachProperty, value);
+        }
+
+        public static void SetPassword(DependencyObject dp, string value) {
+            dp.SetValue(PasswordProperty, value);
+        }
+
+        #endregion Public Methods
     }
 }

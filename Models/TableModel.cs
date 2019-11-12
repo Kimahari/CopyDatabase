@@ -3,37 +3,13 @@ using DataBaseCompare.Tools;
 using System;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
 
     public class TableModel : ScriptedModel {
 
-        #region Properties
-
-        public Action<long> CurrentReportCallback { get; private set; }
-
-        #endregion Properties
-
-        #region Methods
-
-        internal override async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) {
-            await CreateTableAsync(args, callback);
-
-            if (args.CopyData) {
-                await Task.Factory.StartNew(() => {
-                    using (var sourceConnection = new SqlConnection(args.SourceModel.BuildConnection(args.DatabaseName))) {
-                        sourceConnection.Open();
-                        using (var cmd = new SqlCommand($"SELECT * FROM [{Schema}].[{Name}]", sourceConnection)) {
-                            using (var reader = cmd.ExecuteReader()) {
-                                CopyTableData(args.Connection, args.Transaction, reader);
-                            }
-                        }
-                    }
-                }).ConfigureAwait(false);
-            }
-        }
+        #region Private Methods
 
         private void ConfigureBulkCopy(SqlBulkCopy bulkCopy) {
             bulkCopy.DestinationTableName = $"[{Schema}].[{Name}]";
@@ -54,24 +30,55 @@ namespace DataBaseCompare.Models {
         }
 
         private async Task CreateTableAsync(CopyToArguments args, Action<long> callback) {
-            var sql = await ScriptTableAsync(args.SourceModel, args.DatabaseName);
+            string sql = await ScriptTableAsync(args.SourceModel, args.DatabaseName);
             CurrentReportCallback = callback;
             await ExecuteSQL(sql, args.Connection, args.Transaction);
         }
 
-        private void OnRowsCopied(object sender, SqlRowsCopiedEventArgs e) => CurrentReportCallback?.Invoke(e.RowsCopied);
+        private void OnRowsCopied(object sender, SqlRowsCopiedEventArgs e) {
+            CurrentReportCallback?.Invoke(e.RowsCopied);
+        }
 
-        private Task<string> ScriptTableAsync(ConnectionModel sourceModel, string databaseName) => Task.Factory.StartNew(() => {
-            using (var connection = new SqlConnection(sourceModel.BuildConnection(databaseName))) {
-                connection.Open();
-                return connection.Query<string>(Constants.CreateTableScript.Replace("{Schema}.{Name}", $"{Schema}.{Name}")).FirstOrDefault()?.Replace("#TABLENAME", $"[{Name}]")?.Replace("IDENTITY(*,1)", $"IDENTITY(1,1)");
-            }
-        });
+        private Task<string> ScriptTableAsync(ConnectionModel sourceModel, string databaseName) {
+            return Task.Factory.StartNew(() => {
+                using (SqlConnection connection = new SqlConnection(sourceModel.BuildConnection(databaseName))) {
+                    connection.Open();
+                    return connection.Query<string>(Constants.CreateTableScript.Replace("{Schema}.{Name}", $"{Schema}.{Name}")).FirstOrDefault()?.Replace("#TABLENAME", $"[{Name}]")?.Replace("IDENTITY(*,1)", $"IDENTITY(1,1)");
+                }
+            });
+        }
 
         private void UnConfigureBulkCopy(SqlBulkCopy bulkCopy) {
             bulkCopy.SqlRowsCopied -= OnRowsCopied;
         }
 
-        #endregion Methods
+        #endregion Private Methods
+
+        #region Internal Methods
+
+        internal override async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) {
+            await CreateTableAsync(args, callback);
+
+            if (args.CopyData) {
+                await Task.Factory.StartNew(() => {
+                    using (SqlConnection sourceConnection = new SqlConnection(args.SourceModel.BuildConnection(args.DatabaseName))) {
+                        sourceConnection.Open();
+                        using (SqlCommand cmd = new SqlCommand($"SELECT * FROM [{Schema}].[{Name}]", sourceConnection)) {
+                            using (SqlDataReader reader = cmd.ExecuteReader()) {
+                                CopyTableData(args.Connection, args.Transaction, reader);
+                            }
+                        }
+                    }
+                }).ConfigureAwait(false);
+            }
+        }
+
+        #endregion Internal Methods
+
+        #region Public Properties
+
+        public Action<long> CurrentReportCallback { get; private set; }
+
+        #endregion Public Properties
     }
 }

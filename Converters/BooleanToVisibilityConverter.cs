@@ -12,7 +12,7 @@ namespace DataBaseCompare.Converters {
     /// </summary>
     public class BooleanToVisibilityConverter : IValueConverter {
 
-        #region Fields
+        #region Private Fields
 
         //Set to true if you just want to hide the control
         //else set to false if you want to collapse the control
@@ -22,9 +22,26 @@ namespace DataBaseCompare.Converters {
         //Set to false if you want to hide/collapse control when value is true
         private bool triggerValue;
 
-        #endregion Fields
+        #endregion Private Fields
 
-        #region Properties
+        #region Private Methods
+
+        private object GetVisibility(object value) {
+            if (!(value is bool))
+                return DependencyProperty.UnsetValue;
+            bool objValue = (bool)value;
+            if ((objValue && TriggerValue && IsHidden) || (!objValue && !TriggerValue && IsHidden)) {
+                return Visibility.Hidden;
+            }
+            if ((objValue && TriggerValue && !IsHidden) || (!objValue && !TriggerValue && !IsHidden)) {
+                return Visibility.Collapsed;
+            }
+            return Visibility.Visible;
+        }
+
+        #endregion Private Methods
+
+        #region Public Properties
 
         public bool IsHidden {
             get => isHidden;
@@ -36,9 +53,9 @@ namespace DataBaseCompare.Converters {
             set => triggerValue = value;
         }
 
-        #endregion Properties
+        #endregion Public Properties
 
-        #region Methods
+        #region Public Methods
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             return GetVisibility(value);
@@ -48,25 +65,12 @@ namespace DataBaseCompare.Converters {
             throw new NotImplementedException();
         }
 
-        private object GetVisibility(object value) {
-            if (!(value is bool))
-                return DependencyProperty.UnsetValue;
-            var objValue = (bool) value;
-            if ((objValue && TriggerValue && IsHidden) || (!objValue && !TriggerValue && IsHidden)) {
-                return Visibility.Hidden;
-            }
-            if ((objValue && TriggerValue && !IsHidden) || (!objValue && !TriggerValue && !IsHidden)) {
-                return Visibility.Collapsed;
-            }
-            return Visibility.Visible;
-        }
-
-        #endregion Methods
+        #endregion Public Methods
     }
 
     public class HasValueConverter : IValueConverter {
 
-        #region Methods
+        #region Public Methods
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             return !String.IsNullOrEmpty($"{value}") ? Visibility.Visible : Visibility.Collapsed;
@@ -76,12 +80,12 @@ namespace DataBaseCompare.Converters {
             throw new NotImplementedException();
         }
 
-        #endregion Methods
+        #endregion Public Methods
     }
 
     public class SecureStringValueConverter : IValueConverter {
 
-        #region Methods
+        #region Public Methods
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             return (value as SecureString).SecureStringToString();
@@ -91,6 +95,6 @@ namespace DataBaseCompare.Converters {
             return $"{value}".ToSecureString();
         }
 
-        #endregion Methods
+        #endregion Public Methods
     }
 }

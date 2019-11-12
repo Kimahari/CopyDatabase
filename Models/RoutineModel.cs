@@ -2,12 +2,18 @@
 
     public class RoutineModel : ScriptedModel {
 
-        #region Properties
+        #region Public Properties
 
         public string Type { get; set; }
 
-        #endregion Properties
+        #endregion Public Properties
 
-        public override string ToString() => $"({Type}) - [{Name}]";
+        #region Public Methods
+
+        public override string ToString() {
+            return $"({Type}) - [{Name}]";
+        }
+
+        #endregion Public Methods
     }
 }

@@ -1,29 +1,28 @@
-﻿using System;
+﻿using DataBaseCompare.Converters;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Globalization;
 using System.Windows;
-using DataBaseCompare.Converters;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CopyDatabaseTests {
+
     [TestClass]
     public class BooleanToVisibilityConverterTests {
-        private BooleanToVisibilityConverter converter;
+
+        #region Private Fields
+
+        private readonly BooleanToVisibilityConverter converter;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public BooleanToVisibilityConverterTests() {
-            this.converter = new BooleanToVisibilityConverter();
+            converter = new BooleanToVisibilityConverter();
         }
 
-        [TestMethod]
-        public void MustBeVisible() {
-            Assert.AreEqual(Visibility.Visible, converter.Convert(true, null, null, CultureInfo.InvariantCulture));
-        }
+        #endregion Public Constructors
 
-        [TestMethod]
-        public void MustBeVisibleReverse() {
-            converter.TriggerValue = true;
-            Assert.AreEqual(Visibility.Visible, converter.Convert(false, null, null, CultureInfo.InvariantCulture));
-            converter.TriggerValue = false;
-        }
+        #region Public Methods
 
         [TestMethod]
         public void MustBeCollapsed() {
@@ -52,5 +51,19 @@ namespace CopyDatabaseTests {
             converter.IsHidden = false;
             converter.TriggerValue = false;
         }
+
+        [TestMethod]
+        public void MustBeVisible() {
+            Assert.AreEqual(Visibility.Visible, converter.Convert(true, null, null, CultureInfo.InvariantCulture));
+        }
+
+        [TestMethod]
+        public void MustBeVisibleReverse() {
+            converter.TriggerValue = true;
+            Assert.AreEqual(Visibility.Visible, converter.Convert(false, null, null, CultureInfo.InvariantCulture));
+            converter.TriggerValue = false;
+        }
+
+        #endregion Public Methods
     }
 }
