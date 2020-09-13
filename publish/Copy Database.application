@@ -14,7 +14,7 @@
     <framework targetVersion="4.6.1" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="Application Files\Copy Database_1_0_0_3\Copy Database.exe.manifest" size="11140">
+    <dependentAssembly dependencyType="install" codebase="Application Files\Copy Database_1_0_0_4\Copy Database.exe.manifest" size="11140">
       <assemblyIdentity name="Copy Database.exe" version="1.0.0.3" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
     </dependentAssembly>
   </dependency>
