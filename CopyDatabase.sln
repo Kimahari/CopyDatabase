@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BetterCode", "BetterCode", "{FED15082-96C5-4473-A7AF-F7AB7CE453B6}"
 	ProjectSection(SolutionItems) = preProject
 		.bettercodehub.yml = .bettercodehub.yml
+		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject

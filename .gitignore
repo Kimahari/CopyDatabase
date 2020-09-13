@@ -6,3 +6,4 @@
 /CopyDatabaseInstaller/Debug
 /CopyDatabaseInstaller/Release
 /*.user
+!publish/
