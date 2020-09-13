@@ -8,7 +8,7 @@
         <beforeApplicationStartup />
       </update>
     </subscription>
-    <deploymentProvider codebase="https://raw.githubusercontent.com/Kimahari/CopyDatabase/master/Publish/CopyDatabase.application" />
+    <deploymentProvider codebase="https://raw.githubusercontent.com/Kimahari/CopyDatabase/master/publish/CopyDatabase.application" />
   </deployment>
   <compatibleFrameworks xmlns="urn:schemas-microsoft-com:clickonce.v2">
     <framework targetVersion="4.6.1" profile="Full" supportedRuntime="4.0.30319" />
