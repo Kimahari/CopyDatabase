@@ -5,12 +5,6 @@ A Simple Tool To Copy a Database from one MsSQL Server to Another
 
 [![](https://codescene.io/projects/5388/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/5388/jobs/latest-successful/results)
 
-## Installation Instructions
-
-1) The Copy database Tool can be downloaded from the releases section [CopyDatabase.msi v1.0.0](https://github.com/Kimahari/CopyDatabase/releases/download/1.0.0/CopyDatabase.msi)
-
-2) Once the installtion process is compeleted you will have access to the Application via Windows start menu.
-
 ## Download
 
 This application uses Click once deployment packaging to install please use the following [CopyDatabase.application](https://github.com/Kimahari/CopyDatabase/releases/download/1.0.0.11/CopyDatabase.application)
