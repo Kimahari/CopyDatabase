@@ -11,6 +11,12 @@ A Simple Tool To Copy a Database from one MsSQL Server to Another
 
 2) Once the installtion process is compeleted you will have access to the Application via Windows start menu.
 
+## Download
+
+This application uses Click once deployment packaging to install please use the following [CopyDatabase.application](https://github.com/Kimahari/CopyDatabase/releases/download/1.0.0.11/CopyDatabase.application)
+
+Please note at the moment still trying to get a code signing certificate sorted so windows will display an untrusted publisher when running the application.
+
 ## Using the application
 
 1) Once the application have been started you will see the following window.
