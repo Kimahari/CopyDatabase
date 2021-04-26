@@ -160,7 +160,7 @@
                                     </ScrollViewer>
                                 </Border>
                             </Grid>
-                        </DataTemplate>
+                        </DataTemplate> 
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
