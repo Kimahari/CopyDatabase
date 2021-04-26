@@ -165,8 +165,8 @@
                 </ItemsControl>
             </ScrollViewer>
             <StackPanel Orientation="Horizontal" Grid.Row="3">
-                <metro:ToggleSwitch IsChecked="{Binding CopyTables}" Content="Tables" />
-                <metro:ToggleSwitch IsChecked="{Binding CopyData}" Content="Data" />
+                <metro:ToggleSwitch IsOn="{Binding CopyTables}" Content="Tables" />
+                <metro:ToggleSwitch IsOn="{Binding CopyData}" Content="Data" />
             </StackPanel>
 
             <Grid Grid.Row="4">
