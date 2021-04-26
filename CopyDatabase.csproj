@@ -129,6 +129,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\HasValueConverter.cs" />
+    <Compile Include="Converters\SecureStringValueConverter.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Models\ConnectionModel.cs" />
     <Compile Include="Models\CopyToArguments.cs" />

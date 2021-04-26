@@ -1,18 +1,18 @@
-﻿using Dapper;
-using Newtonsoft.Json.Linq;
-using Prism.Commands;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Dapper;
+
+using Prism.Commands;
+
 namespace DataBaseCompare.Models {
 
-    public class DataBaseModel : ModelBase {
+    public class DataBaseModel :ModelBase {
 
         #region Private Fields
 
@@ -31,7 +31,7 @@ namespace DataBaseCompare.Models {
         }
 
         private void CommitTransactionIfNoErrors(CopyToArguments args) {
-            if (String.IsNullOrEmpty(Error)) {
+            if(string.IsNullOrEmpty(Error)) {
                 args.Transaction.Commit();
                 args.Transaction = args.Connection.BeginTransaction();
             }
@@ -48,65 +48,84 @@ namespace DataBaseCompare.Models {
         private async Task CopyDatabaseObjectToAsync(ScriptedModel Model, CopyToArguments args) {
             try {
                 await Model.CopyToAsync(args).ConfigureAwait(false);
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 Error = $"Faled to copy {Model} - {ex.Message}";
             }
         }
 
         private async Task CopyRoutinesToDestinationAsync(CopyToArguments args) {
             try {
-                foreach (RoutineModel routine in Routines) {
-                    if (!String.IsNullOrEmpty(Error)) break;
+                foreach(RoutineModel routine in Routines) {
+                    if(!string.IsNullOrEmpty(Error)) {
+                        break;
+                    }
+
                     Message = $"Copying ({routine.Type}) {routine.Name}";
                     await CopyDatabaseObjectToAsync(routine, args);
                 }
 
                 CommitTransactionIfNoErrors(args);
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 Error = ex.Message;
             }
         }
 
         private async Task CopyTables(CopyToArguments copyArguments, bool copyTables) {
-            if (!copyTables) return;
+            if(!copyTables) {
+                return;
+            }
+
             await CopyDatabaseObjectsAsync(copyArguments);
-            if (String.IsNullOrEmpty(Error)) copyArguments.Transaction.Commit(); else copyArguments.Transaction.Rollback();
-            if (!String.IsNullOrEmpty(Error)) throw new Exception(Error);
+            if(string.IsNullOrEmpty(Error)) {
+                copyArguments.Transaction.Commit();
+            } else {
+                copyArguments.Transaction.Rollback();
+            }
+
+            if(!string.IsNullOrEmpty(Error)) {
+                throw new Exception(Error);
+            }
         }
 
         private async Task CopyTablesToDestinationAsync(CopyToArguments args) {
             try {
                 int counter = 1;
 
-                foreach (TableModel table in Tables) {
-                    if (!String.IsNullOrEmpty(Error)) break;
+                foreach(TableModel table in Tables) {
+                    if(!string.IsNullOrEmpty(Error)) {
+                        break;
+                    }
+
                     Message = $"Copying Table {counter} of {Tables.Count} ({table.Name})";
                     try {
                         await table.CopyToAsync(args, (rows) => {
                             Message = $"Copying Table {counter} of {Tables.Count} ({table.Name}) - ({rows} Rows Copied) ";
                         }).ConfigureAwait(false);
                         counter++;
-                    } catch (Exception ex) {
+                    } catch(Exception ex) {
                         Error = $"Faled to copy table [{table.Name}] - {ex.Message}";
                     }
                 }
 
                 CommitTransactionIfNoErrors(args);
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 Error = ex.Message;
             }
         }
 
         private async Task CopyViewsToDestinationAsync(CopyToArguments args) {
             try {
-                foreach (ScriptedModel view in Views) {
-                    if (!String.IsNullOrEmpty(Error)) break;
+                foreach(ScriptedModel view in Views) {
+                    if(!string.IsNullOrEmpty(Error)) {
+                        break;
+                    }
+
                     Message = $"Copying View {view.Name}";
                     await CopyDatabaseObjectToAsync(view, args);
                 }
 
                 CommitTransactionIfNoErrors(args);
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 Error = ex.Message;
             }
         }
@@ -126,9 +145,11 @@ namespace DataBaseCompare.Models {
         private async Task EnsureCreatedAsync(ConnectionModel destinationConnection, CancellationToken token) {
             Message = "Craeting Database on Destination";
             await Task.Factory.StartNew(() => {
-                using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection())) {
+                using(SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection())) {
                     connection.Open();
-                    using (SqlCommand cmd = new SqlCommand($@"CREATE DATABASE [{Name}]", connection)) cmd.ExecuteNonQuery();
+                    using(SqlCommand cmd = new SqlCommand($@"CREATE DATABASE [{Name}]", connection)) {
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
                 EnsureSchemasCreated(destinationConnection);
@@ -138,20 +159,30 @@ namespace DataBaseCompare.Models {
         private async Task EnsureDeletedAsync(ConnectionModel destinationConnection, CancellationToken token) {
             Message = "Removing Database from destination";
             await Task.Factory.StartNew(() => {
-                using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection())) {
+                using(SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection())) {
                     connection.Open();
-                    using (SqlCommand cmd = new SqlCommand($@"ALTER DATABASE [{Name}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", connection)) cmd.ExecuteNonQuery();
-                    using (SqlCommand cmd = new SqlCommand($@"DROP DATABASE [{Name}]", connection)) cmd.ExecuteNonQuery();
+                    using(SqlCommand cmd = new SqlCommand($@"ALTER DATABASE [{Name}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", connection)) {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    using(SqlCommand cmd = new SqlCommand($@"DROP DATABASE [{Name}]", connection)) {
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }).ConfigureAwait(false);
         }
 
         private void EnsureSchemasCreated(ConnectionModel destinationConnection) {
-            foreach (string schema in Tables.GroupBy(ii => ii.Schema).Select(ii => ii.Key)) {
-                if (schema == "dbo") continue;
-                using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
+            foreach(string schema in Tables.GroupBy(ii => ii.Schema).Select(ii => ii.Key)) {
+                if(schema == "dbo") {
+                    continue;
+                }
+
+                using(SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
                     connection.Open();
-                    using (SqlCommand cmd = new SqlCommand($@"CREATE SCHEMA [{schema}]", connection)) cmd.ExecuteNonQuery();
+                    using(SqlCommand cmd = new SqlCommand($@"CREATE SCHEMA [{schema}]", connection)) {
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
         }
@@ -159,10 +190,10 @@ namespace DataBaseCompare.Models {
         private async Task<IEnumerable<RoutineModel>> GetDatabaseRoutinesAsync() {
             return await Task<IEnumerable<RoutineModel>>.Factory.StartNew(() => {
                 const string sql = "SELECT SPECIFIC_SCHEMA AS [Schema] , SPECIFIC_NAME as [Name], B.definition as SCRIPT, A.ROUTINE_TYPE AS [Type] FROM INFORMATION_SCHEMA.ROUTINES A\r\n\tINNER JOIN sys.sql_modules B ON object_id =  OBJECT_ID(SPECIFIC_SCHEMA+'.'+SPECIFIC_NAME)";
-                using (SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
+                using(SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
                     try {
                         connection.Open();
-                    } catch (Exception ex) {
+                    } catch(Exception ex) {
                         Error = ex.Message;
                         return new List<RoutineModel>();
                     }
@@ -173,10 +204,10 @@ namespace DataBaseCompare.Models {
 
         private async Task<IEnumerable<TableModel>> GetDatabaseTablesAsync() {
             return await Task<IEnumerable<TableModel>>.Factory.StartNew(() => {
-                using (SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
+                using(SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
                     try {
                         connection.Open();
-                    } catch (Exception ex) {
+                    } catch(Exception ex) {
                         Error = ex.Message;
                         return new List<TableModel>();
                     }
@@ -191,10 +222,10 @@ namespace DataBaseCompare.Models {
 INNER JOIN sys.sql_modules B ON object_id =  OBJECT_ID(TABLE_SCHEMA+'.'+TABLE_NAME)
 WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate database_default";
 
-                using (SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
+                using(SqlConnection connection = new SqlConnection(ConnectionModel.BuildConnection(Name))) {
                     try {
                         connection.Open();
-                    } catch (Exception ex) {
+                    } catch(Exception ex) {
                         Error = ex.Message;
                         return new List<ScriptedModel>();
                     }
@@ -204,21 +235,21 @@ WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate databas
         }
 
         private void LoadRoutines(IEnumerable<RoutineModel> data3) {
-            foreach (RoutineModel item in data3) {
+            foreach(RoutineModel item in data3) {
                 item.DatabaseName = name;
                 Routines.Add(item);
             }
         }
 
         private void LoadTables(IEnumerable<TableModel> data) {
-            foreach (TableModel item in data) {
+            foreach(TableModel item in data) {
                 item.DatabaseName = name;
                 Tables.Add(item);
             }
         }
 
         private void LoadViews(IEnumerable<ScriptedModel> data2) {
-            foreach (ScriptedModel item in data2) {
+            foreach(ScriptedModel item in data2) {
                 item.DatabaseName = name;
                 Views.Add(item);
             }
@@ -230,8 +261,9 @@ WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate databas
         }
 
         private async Task RemoveIfExistsAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, CancellationToken token) {
-            if (destinationDatabases.Any(db => db.Name.Equals(Name, StringComparison.InvariantCultureIgnoreCase)))
+            if(destinationDatabases.Any(db => db.Name.Equals(Name, StringComparison.InvariantCultureIgnoreCase))) {
                 await EnsureDeletedAsync(destinationConnection, token).ConfigureAwait(false);
+            }
         }
 
         #endregion Private Methods
@@ -242,17 +274,17 @@ WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate databas
             StartOperation();
             try {
                 await RecreateDatabase(destinationConnection, destinationDatabases, token);
-                using (SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
+                using(SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
                     await connection.OpenAsync().ConfigureAwait(false);
                     CopyToArguments copyArguments = CreateArguments(destinationConnection, copyData, connection, token);
                     await CopyTables(copyArguments, copyTables);
                 }
-            } catch (Exception ex) {
+            } catch(Exception ex) {
                 Error = ex.Message;
                 throw;
             } finally {
                 IsBusy = false;
-                Message = String.Empty;
+                Message = string.Empty;
             }
         }
 
@@ -265,8 +297,6 @@ WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate databas
             ShowTablesCommand = new DelegateCommand(() => ShowTables = true);
             HideTablesCommand = new DelegateCommand(() => ShowTables = false);
         }
-
-        
 
         #endregion Public Constructors
 

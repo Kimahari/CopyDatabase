@@ -1,7 +1,9 @@
-﻿using DataBaseCompare.Converters;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
+
+using DataBaseCompare.Converters;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CopyDatabaseTests {
 

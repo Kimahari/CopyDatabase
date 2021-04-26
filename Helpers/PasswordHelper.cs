@@ -19,8 +19,9 @@ namespace DataBaseCompare.Helpers {
             DependencyPropertyChangedEventArgs e) {
             PasswordBox passwordBox = sender as PasswordBox;
 
-            if (passwordBox == null)
+            if (passwordBox == null) {
                 return;
+            }
 
             if ((bool)e.OldValue) {
                 passwordBox.PasswordChanged -= PasswordChanged;
@@ -40,7 +41,7 @@ namespace DataBaseCompare.Helpers {
             PasswordBox passwordBox = sender as PasswordBox;
             passwordBox.PasswordChanged -= PasswordChanged;
 
-            if (!(bool)GetIsUpdating(passwordBox)) {
+            if (!GetIsUpdating(passwordBox)) {
                 passwordBox.Password = (string)e.NewValue;
             }
             passwordBox.PasswordChanged += PasswordChanged;

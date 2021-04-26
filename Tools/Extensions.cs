@@ -8,8 +8,10 @@ namespace DataBaseCompare.Tools {
 
         #region Public Methods
 
-        public static String SecureStringToString(this SecureString value) {
-            if (value == null) return string.Empty;
+        public static string SecureStringToString(this SecureString value) {
+            if (value == null) {
+                return string.Empty;
+            }
 
             IntPtr valuePtr = IntPtr.Zero;
 
