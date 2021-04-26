@@ -1,7 +1,6 @@
-﻿using DataBaseCompare.Tools;
+﻿
 using System;
 using System.Globalization;
-using System.Security;
 using System.Windows;
 using System.Windows.Data;
 
@@ -10,7 +9,7 @@ namespace DataBaseCompare.Converters {
     /// <summary>
     /// Converts Boolean Values to Control.Visibility values
     /// </summary>
-    public class BooleanToVisibilityConverter : IValueConverter {
+    public class BooleanToVisibilityConverter :IValueConverter {
 
         #region Private Fields
 
@@ -27,8 +26,10 @@ namespace DataBaseCompare.Converters {
         #region Private Methods
 
         private object GetVisibility(object value) {
-            if (!(value is bool))
+            if (!(value is bool)) {
                 return DependencyProperty.UnsetValue;
+            }
+
             bool objValue = (bool)value;
             if ((objValue && TriggerValue && IsHidden) || (!objValue && !TriggerValue && IsHidden)) {
                 return Visibility.Hidden;
@@ -63,36 +64,6 @@ namespace DataBaseCompare.Converters {
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
             throw new NotImplementedException();
-        }
-
-        #endregion Public Methods
-    }
-
-    public class HasValueConverter : IValueConverter {
-
-        #region Public Methods
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return !String.IsNullOrEmpty($"{value}") ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
-            throw new NotImplementedException();
-        }
-
-        #endregion Public Methods
-    }
-
-    public class SecureStringValueConverter : IValueConverter {
-
-        #region Public Methods
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return (value as SecureString).SecureStringToString();
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
-            return $"{value}".ToSecureString();
         }
 
         #endregion Public Methods

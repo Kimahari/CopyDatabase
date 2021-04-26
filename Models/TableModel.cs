@@ -1,9 +1,11 @@
-﻿using Dapper;
-using DataBaseCompare.Tools;
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Dapper;
+
+using DataBaseCompare.Tools;
 
 namespace DataBaseCompare.Models {
 

@@ -1,6 +1,6 @@
-﻿using Prism.Mvvm;
-using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+
+using Prism.Mvvm;
 
 namespace DataBaseCompare.Models {
 
@@ -23,7 +23,7 @@ namespace DataBaseCompare.Models {
 
         protected void StartOperation() {
             IsBusy = true;
-            Message = Error = String.Empty;
+            Message = Error = string.Empty;
         }
 
         #endregion Protected Methods

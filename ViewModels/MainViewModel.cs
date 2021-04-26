@@ -1,8 +1,4 @@
-﻿using Dapper;
-using DataBaseCompare.Models;
-using Newtonsoft.Json.Linq;
-using Prism.Commands;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
@@ -10,6 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Dapper;
+
+using DataBaseCompare.Models;
+
+using Newtonsoft.Json.Linq;
+
+using Prism.Commands;
 
 namespace DataBaseCompare.ViewModels {
 
@@ -35,7 +39,10 @@ namespace DataBaseCompare.ViewModels {
             int counter = 1;
 
             foreach (DataBaseModel database in selectedDatabases) {
-                if (CancelationSource.IsCancellationRequested) break;
+                if (CancelationSource.IsCancellationRequested) {
+                    break;
+                }
+
                 Message = $"Copying {counter} from {selectedDatabases.Count} ({database.Name})";
                 try {
                     await database.CopyToAsync(DestinationConnection, destinationDatabases, copyData, copyTables, CancelationSource.Token);
@@ -122,13 +129,13 @@ namespace DataBaseCompare.ViewModels {
             DestinationConnection = new ConnectionModel { ServerInstance = @".\SQLExpress" };
 
             if (File.Exists("./server-source.conf")) {
-                var conf = JObject.Parse(File.ReadAllText("./server-source.conf"));
+                JObject conf = JObject.Parse(File.ReadAllText("./server-source.conf"));
                 SourceConnection.ServerInstance = conf["ServerInstance"].ToString();
                 SourceConnection.UserName = conf["UserName"].ToString();
             }
 
             if (File.Exists("./server-dest.conf")) {
-                var conf = JObject.Parse(File.ReadAllText("./server-dest.conf"));
+                JObject conf = JObject.Parse(File.ReadAllText("./server-dest.conf"));
                 DestinationConnection.ServerInstance = conf["ServerInstance"].ToString();
                 DestinationConnection.UserName = conf["UserName"].ToString();
             }

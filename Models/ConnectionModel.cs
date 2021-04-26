@@ -1,10 +1,12 @@
-﻿using DataBaseCompare.Tools;
-using Prism.Commands;
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+
+using DataBaseCompare.Tools;
+
+using Prism.Commands;
 
 namespace DataBaseCompare.Models {
 
@@ -23,7 +25,7 @@ namespace DataBaseCompare.Models {
         #region Private Methods
 
         private bool CanTestConnection() {
-            return !IsBusy && !String.IsNullOrEmpty(ServerInstance);
+            return !IsBusy && !string.IsNullOrEmpty(ServerInstance);
         }
 
         private async void OnTestConnectionAsync() {
@@ -31,7 +33,10 @@ namespace DataBaseCompare.Models {
         }
 
         private void SetIsBusy(bool value, string message = null) {
-            if (!value) Message = message ?? String.Empty;
+            if (!value) {
+                Message = message ?? string.Empty;
+            }
+
             IsBusy = value;
             TestConnection.RaiseCanExecuteChanged();
         }
@@ -41,7 +46,10 @@ namespace DataBaseCompare.Models {
         #region Protected Methods
 
         protected override string OnValidateProperty(string propertyName) {
-            if (changes && String.IsNullOrEmpty(ServerInstance)) return "Server Instance Required";
+            if (changes && string.IsNullOrEmpty(ServerInstance)) {
+                return "Server Instance Required";
+            }
+
             return base.OnValidateProperty(propertyName);
         }
 
@@ -110,15 +118,17 @@ namespace DataBaseCompare.Models {
         #region Public Methods
 
         public string BuildConnection(string databaseName = "") {
-            string intergrated = String.IsNullOrEmpty(UserName) ? "SSPI" : "False";
+            string intergrated = string.IsNullOrEmpty(UserName) ? "SSPI" : "False";
 
             StringBuilder builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
 
-            if (!String.IsNullOrEmpty(UserName))
+            if (!string.IsNullOrEmpty(UserName)) {
                 builder.Append($"User ID={UserName};Password={Password.SecureStringToString()};");
+            }
 
-            if (!String.IsNullOrEmpty(databaseName))
+            if (!string.IsNullOrEmpty(databaseName)) {
                 builder.Append($"Initial Catalog={databaseName};");
+            }
 
             return builder.ToString();
         }
