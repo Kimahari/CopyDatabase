@@ -11,17 +11,17 @@
     <deploymentProvider codebase="https://raw.githubusercontent.com/Kimahari/CopyDatabase/master/Publish/CopyDatabase.application" />
   </deployment>
   <compatibleFrameworks xmlns="urn:schemas-microsoft-com:clickonce.v2">
-    <framework targetVersion="4.6.1" profile="Full" supportedRuntime="4.0.30319" />
+    <framework targetVersion="4.8" profile="Full" supportedRuntime="4.0.30319" />
   </compatibleFrameworks>
   <dependency>
-    <dependentAssembly dependencyType="install" codebase="Application Files\CopyDatabase_1_0_0_11\CopyDatabase.exe.manifest" size="11135">
+    <dependentAssembly dependencyType="install" codebase="Application Files\CopyDatabase_1_0_0_14\CopyDatabase.exe.manifest" size="13301">
       <assemblyIdentity name="CopyDatabase.exe" version="1.0.0.11" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>2HUq/zF8y/PDHdkqwy6JUvBKYQxsH8R+eFMC4xPJpIQ=</dsig:DigestValue>
+        <dsig:DigestValue>y9AHXYQI+LZnEcTlUoRiiLfH/w4hhfNZvzosCUrZxqE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
