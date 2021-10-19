@@ -24,7 +24,7 @@ jobs:
         uses: nuget/setup-nuget@v1
         
       - name: Restore NuGet Packages
-        run: nuget restore SimpleFrameworkApp.sln  
+        run: nuget restore CopyDatabase.sln
         
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
