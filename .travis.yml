@@ -1,2 +1,4 @@
 language: csharp
 solution: solution-name.sln
+script:
+  - msbuild /p:Configuration=Release CopyDatabase.sln
