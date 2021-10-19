@@ -1,6 +1,3 @@
 language: csharp
 os: windows
-mono: none
 solution: CopyDatabase.sln
-script:
-  - msbuild /p:Configuration=Release CopyDatabase.sln
