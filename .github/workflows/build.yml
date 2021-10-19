@@ -19,8 +19,6 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.3
-        with: 
-          vs-version: '[16.4,16.5)'
         
       - name: Setup NuGet
         uses: nuget/setup-nuget@v1
