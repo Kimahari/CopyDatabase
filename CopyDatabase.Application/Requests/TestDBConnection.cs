@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Data;
+
+using FluentValidation;
 
 namespace CopyDatabase.Core.Requests;
 
@@ -32,6 +34,6 @@ public sealed class TestDBConnectionHandler : IRequestHandler<TestDBConnection, 
         var connectionString = builder.BuildConnection(request.Credentials);
         using var connection = connectionFactory.GetDbConnection(connectionString, provider);
         await connection.OpenAsync(cancellationToken);
-        return true;
+        return connection.State == ConnectionState.Open;
     }
 }
