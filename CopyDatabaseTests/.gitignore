@@ -1,8 +1,0 @@
-/packages
-/bin
-/obj
-/.vs
-/CompareDatabase.pfx
-/CopyDatabaseInstaller/Debug
-/CopyDatabaseInstaller/Release
-/*.user
