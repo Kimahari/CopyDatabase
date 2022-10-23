@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CopyDatabase.MsSQLServer;
 
-public class MsSQLConnectionStringBuilder : IConnectionStringBuilder {
+public sealed class MsSQLConnectionStringBuilder : IConnectionStringBuilder {
     public SecureString BuildConnection(IDatabaseServerCredentials credentials, string databaseName = "") {
         string intergrated = credentials.UseWindowsAuth ? "SSPI" : "False";
 

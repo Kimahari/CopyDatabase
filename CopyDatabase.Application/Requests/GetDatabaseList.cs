@@ -1,19 +1,26 @@
 ﻿
 namespace CopyDatabase.Core.Requests;
 
-public record GetDatabaseList : IRequest<string[]> {
+public sealed record GetDatabaseList : IRequest<string[]> {
     public IDatabaseServerCredentials? ServerCredentials { get; set; }
 }
 
-public class GetDatabaseListCommandHandler : IRequestHandler<GetDatabaseList, string[]> {
-    public GetDatabaseListCommandHandler() { }
+public sealed class GetDatabaseListCommandHandler : IRequestHandler<GetDatabaseList, string[]> {
+    private readonly IDbConnectionFactory connectionFactory;
+    private readonly IConnectionStringBuilderFactory connectionStringBuilderFactory;
+
+    public GetDatabaseListCommandHandler(IDbConnectionFactory connectionFactory, IConnectionStringBuilderFactory connectionStringBuilderFactory) {
+        this.connectionFactory = connectionFactory;
+        this.connectionStringBuilderFactory = connectionStringBuilderFactory;
+    }
 
     public async Task<string[]> Handle(GetDatabaseList request, CancellationToken cancellationToken) {
         if (request.ServerCredentials is null) return Array.Empty<string>();
 
         var query = "SELECT name FROM sys.databases";
-        var f = Factories.ConnectionStringBuilderFactory.GetConnectionStringBuilder().BuildConnection(request.ServerCredentials);
-        using var connection = Factories.ConnectionFactory.GetDbConnection(f);
+        
+        var connectionString = connectionStringBuilderFactory.GetConnectionStringBuilder(DatabaseProvider.MsSQLServer).BuildConnection(request.ServerCredentials);
+        using var connection = connectionFactory.GetDbConnection(connectionString, DatabaseProvider.MsSQLServer);
 
         try {
             await connection.OpenAsync(cancellationToken);

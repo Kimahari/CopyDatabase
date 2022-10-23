@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace CopyDatabase.Core.Validation {
-    internal class DatabaseServerCredentialValidator : AbstractValidator<IDatabaseServerCredentials> {
+    internal sealed class DatabaseServerCredentialValidator : AbstractValidator<IDatabaseServerCredentials> {
         public DatabaseServerCredentialValidator() {
             RuleFor(x => x.DataSource).NotEmpty().WithMessage("Source is required");
 

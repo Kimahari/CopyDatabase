@@ -1,27 +1,36 @@
-﻿using CopyDatabase.Core.Factories;
-using CopyDatabase.Core.Validation;
+﻿using FluentValidation;
 
 namespace CopyDatabase.Core.Requests;
 
-public record TestDBConnection : IRequest<bool> {
+public sealed record TestDBConnection : IRequest<bool> {
     public IDatabaseServerCredentials? Credentials { get; set; }
 }
 
-public class TestDBConnectionHandler : IRequestHandler<TestDBConnection, bool> {
+public sealed class TestDBConnectionHandler : IRequestHandler<TestDBConnection, bool> {
+    private readonly AbstractValidator<IDatabaseServerCredentials> credentialsValidator;
+    private readonly IDbConnectionFactory connectionFactory;
+    private readonly IConnectionStringBuilderFactory connectionStringBuilderFactory;
+
+    public TestDBConnectionHandler(AbstractValidator<IDatabaseServerCredentials> credentialsValidator, IDbConnectionFactory connectionFactory, IConnectionStringBuilderFactory connectionStringBuilderFactory) {
+        this.credentialsValidator = credentialsValidator;
+        this.connectionFactory = connectionFactory;
+        this.connectionStringBuilderFactory = connectionStringBuilderFactory;
+    }
 
     public async Task<bool> Handle(TestDBConnection request, CancellationToken cancellationToken) {
         if (request.Credentials is null) return false;
 
-        var x = new DatabaseServerCredentialValidator();
-        var result = await x.ValidateAsync(request.Credentials);
+        var provider = DatabaseProvider.MsSQLServer;
+
+        var result = await credentialsValidator.ValidateAsync(request.Credentials, cancellationToken);
 
         if (!result.IsValid) {
             throw new Exception($"{result.Errors.First().ErrorMessage}");
         }
 
-        var builder = ConnectionStringBuilderFactory.GetConnectionStringBuilder();
+        var builder = connectionStringBuilderFactory.GetConnectionStringBuilder(provider);
         var connectionString = builder.BuildConnection(request.Credentials);
-        using var connection = ConnectionFactory.GetDbConnection(connectionString);
+        using var connection = connectionFactory.GetDbConnection(connectionString, provider);
         await connection.OpenAsync(cancellationToken);
         return true;
     }

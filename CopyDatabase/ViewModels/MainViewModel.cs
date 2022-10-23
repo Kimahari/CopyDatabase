@@ -3,11 +3,12 @@ using MediatR;
 using System.Reflection;
 using System.Collections.ObjectModel;
 using CopyDatabase.Core.Requests;
+using CopyDatabase.Core;
 
 namespace CopyDatabase.ViewModels;
 
 [INotifyPropertyChanged]
-internal partial class MainViewModel {
+internal sealed partial class MainViewModel {
     private readonly ServiceProvider provider;
     private readonly IMediator mediatr;
 
@@ -16,18 +17,25 @@ internal partial class MainViewModel {
     [ObservableProperty] DatabaseServerViewModel destination;
 
     [ObservableProperty] ObservableCollection<string> databases = new();
-
+    
     [ObservableProperty] string selectedDatabase = "";
 
     public MainViewModel() {
-        ServiceCollection collection = new();
-        collection.AddMediatR(typeof(GetDatabaseList).Assembly);
+        ServiceCollection collection = CreateServices();
+
         provider = collection.BuildServiceProvider();
-        
+
         mediatr = provider.GetRequiredService<IMediator>();
-        
+
         source = new(mediatr);
         destination = new(mediatr);
+    }
+
+    private static ServiceCollection CreateServices() {
+        ServiceCollection collection = new();
+        collection.AddMediatR(typeof(GetDatabaseList).Assembly);
+        collection.RegisterCoreServices();
+        return collection;
     }
 
     [RelayCommand]

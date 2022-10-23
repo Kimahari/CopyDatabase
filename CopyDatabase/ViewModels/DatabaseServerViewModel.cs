@@ -13,7 +13,7 @@ using MahApps.Metro.Controls.Dialogs;
 namespace CopyDatabase.ViewModels;
 
 [INotifyPropertyChanged]
-internal partial class DatabaseServerViewModel {
+internal sealed partial class DatabaseServerViewModel {
     private CancellationTokenSource ts = new();
     private IMediator mediator;
     private readonly IDialogCoordinator _dialogCoordinator;

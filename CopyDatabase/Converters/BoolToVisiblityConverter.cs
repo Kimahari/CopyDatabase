@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Data;
 
 namespace CopyDatabase.Converters;
-internal class BoolToVisiblityConverter : IValueConverter {
+internal sealed class BoolToVisiblityConverter : IValueConverter {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
         if (value is not bool b || b == false) return Visibility.Collapsed;
         return Visibility.Visible;
