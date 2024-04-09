@@ -167,6 +167,7 @@
             <StackPanel Orientation="Horizontal" Grid.Row="3">
                 <metro:ToggleSwitch IsOn="{Binding CopyTables}" Content="Tables" />
                 <metro:ToggleSwitch IsOn="{Binding CopyData}" Content="Data" />
+                <metro:ToggleSwitch IsOn="{Binding DropDatabase}" Content="Drop Database" />
             </StackPanel>
 
             <Grid Grid.Row="4">

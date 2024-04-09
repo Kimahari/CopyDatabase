@@ -23,6 +23,12 @@ namespace DataBaseCompare.Models {
 
         private void CopyTableData(SqlConnection connection, SqlTransaction transaction, SqlDataReader reader) {
             if (reader.HasRows) {
+                using (SqlCommand cmd = new SqlCommand($"DELETE FROM [{Schema}].[{Name}]", connection)) {
+                    cmd.Transaction = transaction;
+                    cmd.CommandTimeout = 9000;
+                    cmd.ExecuteScalar();
+                }
+
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction)) {
                     ConfigureBulkCopy(bulkCopy);
                     bulkCopy.WriteToServer(reader);
@@ -59,7 +65,8 @@ namespace DataBaseCompare.Models {
         #region Internal Methods
 
         internal override async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) {
-            await CreateTableAsync(args, callback);
+            
+            if(args.Recreate) await CreateTableAsync(args, callback);
 
             if (args.CopyData) {
                 await Task.Factory.StartNew(() => {

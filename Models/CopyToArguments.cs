@@ -15,6 +15,8 @@ namespace DataBaseCompare.Models {
         public CancellationToken Token { get; internal set; }
         public SqlTransaction Transaction { get; internal set; }
 
+        public bool Recreate { get; set; } = true;
+
         #endregion Public Properties
     }
 }

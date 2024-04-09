@@ -23,6 +23,7 @@ namespace DataBaseCompare.ViewModels {
 
         private bool copyData = true;
         private bool copyTables = true;
+        private bool dropDatabase = true;
         private string title = "Copy Databases";
 
         #endregion Private Fields
@@ -45,7 +46,7 @@ namespace DataBaseCompare.ViewModels {
 
                 Message = $"Copying {counter} from {selectedDatabases.Count} ({database.Name})";
                 try {
-                    await database.CopyToAsync(DestinationConnection, destinationDatabases, copyData, copyTables, CancelationSource.Token);
+                    await database.CopyToAsync(DestinationConnection, destinationDatabases, copyData, copyTables, dropDatabase, CancelationSource.Token);
                     counter++;
                 } catch (Exception ex) {
                     Error = ex.Message;
@@ -67,7 +68,7 @@ namespace DataBaseCompare.ViewModels {
                 });
             } catch (Exception ex) {
                 Error = ex.Message;
-                CancelationSource.Cancel();
+                CancelationSource?.Cancel();
                 return new List<DataBaseModel>();
             }
         }
@@ -166,6 +167,11 @@ namespace DataBaseCompare.ViewModels {
         #region Public Properties
 
         public CancellationTokenSource CancelationSource { get; private set; }
+
+        public bool DropDatabase {
+            get => dropDatabase;
+            set => SetProperty(ref dropDatabase, value);
+        }
 
         public bool CopyData {
             get => copyData;

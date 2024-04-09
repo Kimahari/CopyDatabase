@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace DataBaseCompare.Models {
@@ -9,12 +8,10 @@ namespace DataBaseCompare.Models {
 
         #region Protected Methods
 
-        protected static ConfiguredTaskAwaitable ExecuteSQL(string sql, SqlConnection connection, SqlTransaction transaction) {
-            return Task.Factory.StartNew(() => {
-                using (SqlCommand command = new SqlCommand(sql, connection, transaction)) {
-                    command.ExecuteNonQuery();
-                }
-            }).ConfigureAwait(false);
+        protected static async Task ExecuteSQL(string sql, SqlConnection connection, SqlTransaction transaction) {
+            using (SqlCommand command = new SqlCommand(sql, connection, transaction)) {
+                await command.ExecuteNonQueryAsync();
+            }
         }
 
         #endregion Protected Methods

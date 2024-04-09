@@ -55,15 +55,17 @@ namespace DataBaseCompare.Models {
 
         private async Task CopyRoutinesToDestinationAsync(CopyToArguments args) {
             try {
-                foreach(RoutineModel routine in Routines) {
+                if (!args.Recreate) return;
+
+                foreach (RoutineModel routine in Routines) {
                     if(!string.IsNullOrEmpty(Error)) {
                         break;
                     }
-
+                    
                     Message = $"Copying ({routine.Type}) {routine.Name}";
                     await CopyDatabaseObjectToAsync(routine, args);
+                    CommitTransactionIfNoErrors(args);
                 }
-
                 CommitTransactionIfNoErrors(args);
             } catch(Exception ex) {
                 Error = ex.Message;
@@ -71,11 +73,10 @@ namespace DataBaseCompare.Models {
         }
 
         private async Task CopyTables(CopyToArguments copyArguments, bool copyTables) {
-            if(!copyTables) {
-                return;
-            }
+            if(!copyTables) return;
 
             await CopyDatabaseObjectsAsync(copyArguments);
+
             if(string.IsNullOrEmpty(Error)) {
                 copyArguments.Transaction.Commit();
             } else {
@@ -115,7 +116,9 @@ namespace DataBaseCompare.Models {
 
         private async Task CopyViewsToDestinationAsync(CopyToArguments args) {
             try {
-                foreach(ScriptedModel view in Views) {
+                if (!args.Recreate) return;
+
+                foreach (ScriptedModel view in Views) {
                     if(!string.IsNullOrEmpty(Error)) {
                         break;
                     }
@@ -270,13 +273,17 @@ WHERE TABLE_NAME not in ('sysdiagrams') AND TABLE_TYPE  = 'View' collate databas
 
         #region Internal Methods
 
-        internal async Task CopyToAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, bool copyTables, bool copyData, CancellationToken token) {
+        internal async Task CopyToAsync(ConnectionModel destinationConnection, IEnumerable<DataBaseModel> destinationDatabases, bool copyTables, bool copyData, bool dropDatabase, CancellationToken token) {
             StartOperation();
             try {
-                await RecreateDatabase(destinationConnection, destinationDatabases, token);
+                if (dropDatabase) {
+                    await RecreateDatabase(destinationConnection, destinationDatabases, token);
+                }
+                
                 using(SqlConnection connection = new SqlConnection(destinationConnection.BuildConnection(name))) {
                     await connection.OpenAsync().ConfigureAwait(false);
                     CopyToArguments copyArguments = CreateArguments(destinationConnection, copyData, connection, token);
+                    copyArguments.Recreate = dropDatabase == true;
                     await CopyTables(copyArguments, copyTables);
                 }
             } catch(Exception ex) {
