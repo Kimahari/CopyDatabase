@@ -29,6 +29,30 @@ namespace DataBaseCompare.Models {
                     cmd.ExecuteScalar();
                 }
 
+                if (Name.StartsWith("SybLog")) {
+                    return;
+                }
+
+                if (Name.StartsWith("SysSybrinStorePackage")) {
+                    return;
+                }
+
+                if (Name.StartsWith("SysScheduleJob")) {
+                    return;
+                }
+
+                if (Name.StartsWith("SysScheduleRun")) {
+                    return;
+                }
+
+                if (Name.StartsWith("SysPackageVersion")) {
+                    return;
+                }
+
+                if (Name.StartsWith("AudSystem")) {
+                    return;
+                }
+
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction)) {
                     ConfigureBulkCopy(bulkCopy);
                     bulkCopy.WriteToServer(reader);

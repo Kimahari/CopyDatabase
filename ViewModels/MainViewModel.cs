@@ -17,7 +17,7 @@ using Prism.Commands;
 
 namespace DataBaseCompare.ViewModels {
 
-    public class MainViewModel : ModelBase {
+    public class MainViewModel : ModelBase, IDisposable {
 
         #region Private Fields
 
@@ -121,6 +121,24 @@ namespace DataBaseCompare.ViewModels {
             IsBusy = false;
         }
 
+        public void Dispose() {
+            File.WriteAllText("./server-source.conf", JObject.FromObject(new {
+                SourceConnection.ServerInstance,
+                SourceConnection.UserName
+            }).ToString());
+
+            File.WriteAllText("./server-dest.conf", JObject.FromObject(new {
+                DestinationConnection.ServerInstance,
+                DestinationConnection.UserName
+            }).ToString());
+
+            File.WriteAllText("./app-main.conf", JObject.FromObject(new {
+                this.CopyData,
+                this.CopyTables,
+                this.DropDatabase,
+            }).ToString());
+        }
+
         #endregion Private Methods
 
         #region Public Constructors
@@ -139,6 +157,13 @@ namespace DataBaseCompare.ViewModels {
                 JObject conf = JObject.Parse(File.ReadAllText("./server-dest.conf"));
                 DestinationConnection.ServerInstance = conf["ServerInstance"].ToString();
                 DestinationConnection.UserName = conf["UserName"].ToString();
+            }
+
+            if (File.Exists("./app-main.conf")) {
+                JObject conf = JObject.Parse(File.ReadAllText("./app-main.conf"));
+                this.CopyData = conf[nameof(CopyData)].ToObject<bool>();
+                this.DropDatabase = conf[nameof(DropDatabase)].ToObject<bool>();
+                this.CopyTables = conf[nameof(CopyTables)].ToObject<bool>();
             }
 
             LoadSourceDatabases = new DelegateCommand(OnLoadSourceTablesAsync);

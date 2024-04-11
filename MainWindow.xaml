@@ -24,6 +24,7 @@
                     Background="{DynamicResource MaterialDesignPaper}"
                     FontFamily="{DynamicResource MaterialDesignFont}"
                     BorderThickness="1"
+                    Closed="MetroWindow_Closed"
                     Title="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Height="500" Width="850">
     <metro:MetroWindow.DataContext>
         <vm:MainViewModel />

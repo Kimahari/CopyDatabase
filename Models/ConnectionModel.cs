@@ -120,7 +120,7 @@ namespace DataBaseCompare.Models {
         public string BuildConnection(string databaseName = "") {
             string intergrated = string.IsNullOrEmpty(UserName) ? "SSPI" : "False";
 
-            StringBuilder builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};");
+            StringBuilder builder = new StringBuilder($"Data Source={serverInstance};Integrated Security={intergrated};TrustServerCertificate=True;");
 
             if (!string.IsNullOrEmpty(UserName)) {
                 builder.Append($"User ID={UserName};Password={Password.SecureStringToString()};");

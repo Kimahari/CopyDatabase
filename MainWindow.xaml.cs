@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using System;
 
 namespace DataBaseCompare {
 
@@ -14,5 +15,9 @@ namespace DataBaseCompare {
         }
 
         #endregion Public Constructors
+
+        private void MetroWindow_Closed(object sender, System.EventArgs e) {
+            if (this.DataContext is IDisposable disposable) disposable.Dispose();
+        }
     }
 }

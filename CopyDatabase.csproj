@@ -29,6 +29,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	 <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>database_access.ico</ApplicationIcon>
