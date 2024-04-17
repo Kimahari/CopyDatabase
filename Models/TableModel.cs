@@ -19,6 +19,7 @@ namespace DataBaseCompare.Models {
             bulkCopy.BulkCopyTimeout = 9000;
             bulkCopy.NotifyAfter = 1;
             bulkCopy.EnableStreaming = true;
+            
         }
 
         private void CopyTableData(SqlConnection connection, SqlTransaction transaction, SqlDataReader reader) {
@@ -89,7 +90,7 @@ namespace DataBaseCompare.Models {
         #region Internal Methods
 
         internal override async Task CopyToAsync(CopyToArguments args, Action<long> callback = null) {
-            
+            this.CurrentReportCallback = callback;
             if(args.Recreate) await CreateTableAsync(args, callback);
 
             if (args.CopyData) {
