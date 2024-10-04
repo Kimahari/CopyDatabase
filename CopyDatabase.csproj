@@ -98,7 +98,7 @@
       <Version>1.1.122</Version>
     </PackageReference>
     <PackageReference Include="Prism.Core">
-      <Version>8.1.97</Version>
+      <Version>9.0.537</Version>
     </PackageReference>
     <PackageReference Include="Prism.Wpf">
       <Version>8.1.97</Version>
