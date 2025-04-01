@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
@@ -78,7 +78,7 @@
       <Version>5.0.2</Version>
     </PackageReference>
     <PackageReference Include="Dapper">
-      <Version>2.1.35</Version>
+      <Version>2.1.66</Version>
     </PackageReference>
     <PackageReference Include="MahApps.Metro">
       <Version>2.4.10</Version>
