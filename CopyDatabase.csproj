@@ -78,7 +78,7 @@
       <Version>5.0.2</Version>
     </PackageReference>
     <PackageReference Include="Dapper">
-      <Version>2.1.35</Version>
+      <Version>2.1.66</Version>
     </PackageReference>
     <PackageReference Include="MahApps.Metro">
       <Version>2.4.10</Version>
