@@ -84,7 +84,7 @@
       <Version>2.4.11</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignColors">
-      <Version>5.2.1</Version>
+      <Version>5.3.1</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
       <Version>5.2.1</Version>
