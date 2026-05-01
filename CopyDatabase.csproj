@@ -87,7 +87,7 @@
       <Version>5.3.1</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
-      <Version>5.3.1</Version>
+      <Version>5.3.2</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes.MahApps">
       <Version>5.3.1</Version>
