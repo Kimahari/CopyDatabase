@@ -1,6 +1,6 @@
-/bin
-/obj
-/.vs
+bin
+obj
+.vs
 /CompareDatabase.pfx
 /CopyDatabaseInstaller/Debug
 /CopyDatabaseInstaller/Release

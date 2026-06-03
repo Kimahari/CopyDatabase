@@ -1,0 +1,132 @@
+﻿<mah:MetroWindow x:Class="CopyDatabase.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:CopyDatabase.ViewModels"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:controls="clr-namespace:CopyDatabase.Controls"
+        Style="{DynamicResource MahApps.Styles.MetroWindow.VisualStudio}"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        Width="1024"
+        Height="768"
+        MinWidth="800"
+        MinHeight="600"
+        d:DesignHeight="600"
+        d:DesignWidth="800"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d"
+        Title="Copy Database 2">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.DataContext>
+        <viewModels:MainViewModel/>
+    </Window.DataContext>
+    <d:Window.DataContext>
+        <viewModels:MainViewModel/>
+    </d:Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label>Source</Label>
+            <Label Grid.Column="2">Destination</Label>
+
+            <controls:InlineEditDatabaseCredentials Grid.Column="1" DataContext="{Binding Source}"/>
+            <controls:InlineEditDatabaseCredentials Grid.Column="3" DataContext="{Binding Destination}"/>
+        </Grid>
+
+        <!--<Button Style="{DynamicResource MahApps.Styles.Button.Flat}"
+                Background="{DynamicResource MahApps.Brushes.Accent}"
+                Foreground="{DynamicResource MahApps.Brushes.SystemControlBackgroundChromeWhite}"
+                Command="{Binding LoadDatabasesCommand}" Grid.Row="1" Margin="5">Load Data bases</Button>-->
+
+        <Grid Margin="5" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Label>Selected Database</Label>
+
+            <ComboBox mah:ComboBoxHelper.CharacterCasing="Normal" x:Name="test" Grid.Column="1" ItemsSource="{Binding Source.DatabaseNames}" SelectedItem="{Binding SelectedDatabase}"></ComboBox>
+        </Grid>
+        
+
+        <TabControl Margin="5" BorderThickness="1" Grid.Row="3" >
+            <TabItem Header="Tables">
+                <ListBox ItemsSource="{Binding Source.DatabaseNames}" 
+                 SelectedItem="{Binding SelectedDatabase}"
+                 x:Name="lst" d:ItemsSource="{d:SampleData ItemCount=4}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Margin="3" ></VirtualizingStackPanel>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </TabItem>
+            <TabItem Header="Views">
+                No System Views
+            </TabItem>
+        </TabControl>
+
+        <StackPanel Grid.Row="4" Margin="5">
+            <Separator/>
+            <StackPanel Orientation="Horizontal">
+                <Label FontSize="25" >Sync Options : </Label>
+                <Label FontSize="25" Content="{Binding SelectedDatabase}" ></Label>
+            </StackPanel>
+            <Separator/>
+            <StackPanel Orientation="Horizontal">
+                <mah:ToggleSwitch>Replace Schema (drop destination database)</mah:ToggleSwitch>
+            </StackPanel>
+
+            <mah:ToggleSwitch>With new name (used when inteded to copy database to the same server)</mah:ToggleSwitch>
+
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <Label FontSize="16" VerticalAlignment="Center" >New DbName</Label>
+                <TextBox VerticalAlignment="Center"  FontSize="12" Width="200" >DbName</TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Margin="5">
+                    <Button Style="{DynamicResource MahApps.Styles.Button.Flat}" >Copy Database schema</Button>
+                </StackPanel>
+
+                <StackPanel Margin="5">
+                    <Button Style="{DynamicResource MahApps.Styles.Button.Flat}" >Copy Database data</Button>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+
+        <StatusBar Grid.Row="5" >
+            <Separator/>
+            <StatusBarItem>User:</StatusBarItem>
+            <StatusBarItem Content="{x:Static system:Environment.UserDomainName}"></StatusBarItem>
+            <StatusBarItem Content="{x:Static system:Environment.UserName}"></StatusBarItem>
+            <Separator/>
+            <StatusBarItem Content="{Binding SelectedDatabase}"></StatusBarItem>
+        </StatusBar>
+    </Grid>
+</mah:MetroWindow>
