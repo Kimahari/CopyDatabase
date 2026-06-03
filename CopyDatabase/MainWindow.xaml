@@ -76,9 +76,7 @@
 
         <TabControl Margin="5" BorderThickness="1" Grid.Row="3" >
             <TabItem Header="Tables">
-                <ListBox ItemsSource="{Binding Source.DatabaseNames}" 
-                 SelectedItem="{Binding SelectedDatabase}"
-                 x:Name="lst" d:ItemsSource="{d:SampleData ItemCount=4}">
+                <ListBox ItemsSource="{Binding TableNames}" x:Name="lst" d:ItemsSource="{d:SampleData ItemCount=4}">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel Margin="3" ></VirtualizingStackPanel>
@@ -87,7 +85,13 @@
                 </ListBox>
             </TabItem>
             <TabItem Header="Views">
-                No System Views
+                <ListBox ItemsSource="{Binding ViewNames}" d:ItemsSource="{d:SampleData ItemCount=4}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Margin="3" ></VirtualizingStackPanel>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
             </TabItem>
         </TabControl>
 

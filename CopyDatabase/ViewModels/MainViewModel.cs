@@ -17,6 +17,10 @@ internal sealed partial class MainViewModel {
     [ObservableProperty] DatabaseServerViewModel destination;
 
     [ObservableProperty] ObservableCollection<string> databases = new();
+
+    [ObservableProperty] ObservableCollection<string> tableNames = new();
+
+    [ObservableProperty] ObservableCollection<string> viewNames = new();
     
     [ObservableProperty] string selectedDatabase = "";
 
@@ -47,5 +51,30 @@ internal sealed partial class MainViewModel {
         databases.Clear();
 
         foreach (var db in data) databases.Add(db);
+    }
+
+    async partial void OnSelectedDatabaseChanged(string value)
+    {
+        tableNames.Clear();
+        viewNames.Clear();
+
+        if (string.IsNullOrWhiteSpace(value)) return;
+
+        var tables = await mediatr.Send(new GetSchemaObjectList
+        {
+            ServerCredentials = source.Credentials,
+            DatabaseName = value,
+            ObjectType = SchemaObjectType.Table
+        });
+
+        var views = await mediatr.Send(new GetSchemaObjectList
+        {
+            ServerCredentials = source.Credentials,
+            DatabaseName = value,
+            ObjectType = SchemaObjectType.View
+        });
+
+        foreach (var table in tables) tableNames.Add(table);
+        foreach (var view in views) viewNames.Add(view);
     }
 }
