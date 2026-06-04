@@ -1,3 +1,0 @@
-language: csharp
-os: windows
-solution: CopyDatabase.sln

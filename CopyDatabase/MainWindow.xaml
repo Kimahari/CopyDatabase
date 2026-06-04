@@ -1,0 +1,184 @@
+<mah:MetroWindow x:Class="CopyDatabase.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:CopyDatabase.ViewModels"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:controls="clr-namespace:CopyDatabase.Controls"
+        Style="{DynamicResource MahApps.Styles.MetroWindow.VisualStudio}"
+        ShowIconOnTitleBar="True"
+        Icon="database_access.ico"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        Width="1024"
+        Height="768"
+        MinWidth="800"
+        MinHeight="600"
+        d:DesignHeight="600"
+        d:DesignWidth="800"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d"
+        Title="Copy Database">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Window.DataContext>
+        <viewModels:MainViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label>Source</Label>
+            <Label Grid.Column="2">Destination</Label>
+
+            <controls:InlineEditDatabaseCredentials AutomationProperties.AutomationId="SourceCredentialsPanel"
+                                                    AutomationProperties.Name="Source database credentials"
+                                                    Grid.Column="1"
+                                                    DataContext="{Binding Source}"/>
+            <controls:InlineEditDatabaseCredentials AutomationProperties.AutomationId="DestinationCredentialsPanel"
+                                                    AutomationProperties.Name="Destination database credentials"
+                                                    Grid.Column="3"
+                                                    DataContext="{Binding Destination}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label VerticalAlignment="Center">Selected Database</Label>
+            <ComboBox AutomationProperties.AutomationId="SourceDatabaseComboBox"
+                      AutomationProperties.Name="Selected source database"
+                      Grid.Column="1"
+                      MinWidth="260"
+                      ItemsSource="{Binding Databases}"
+                      SelectedItem="{Binding SelectedDatabase}"/>
+            <Button AutomationProperties.AutomationId="LoadDatabasesButton"
+                    AutomationProperties.Name="Load source databases"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Command="{Binding LoadSourceDatabasesCommand}">Load Databases</Button>
+            <TextBlock AutomationProperties.AutomationId="MainStatusText"
+                       AutomationProperties.Name="{Binding StatusText}"
+                       Grid.Column="3"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       Text="{Binding StatusText}"/>
+            <ProgressBar AutomationProperties.AutomationId="MainBusyIndicator"
+                         AutomationProperties.Name="Main busy indicator"
+                         Grid.Column="4"
+                         Margin="8,0,0,0"
+                         Width="120"
+                         Height="18"
+                         IsIndeterminate="True"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"/>
+        </Grid>
+
+        <TabControl AutomationProperties.AutomationId="DatabaseObjectsTabControl"
+                    AutomationProperties.Name="Selected database objects"
+                    Grid.Row="2"
+                    Margin="5"
+                    BorderThickness="1">
+            <TabItem Header="Tables" AutomationProperties.AutomationId="TablesTab" AutomationProperties.Name="Tables">
+                <ListView AutomationProperties.AutomationId="TablesList"
+                          AutomationProperties.Name="Selected database tables"
+                          ItemsSource="{Binding TableItems}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type viewModels:TableItemViewModel}">
+                            <Grid AutomationProperties.AutomationId="{Binding AutomationId}"
+                                  AutomationProperties.Name="{Binding Name}"
+                                  Margin="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="260"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock AutomationProperties.AutomationId="{Binding AutomationId, StringFormat={}{0}_NameText}"
+                                           AutomationProperties.Name="{Binding Name}"
+                                           Text="{Binding Name}"/>
+                                <TextBlock AutomationProperties.AutomationId="{Binding AutomationId, StringFormat={}{0}_StatusText}"
+                                           AutomationProperties.Name="{Binding StatusText}"
+                                           Grid.Column="1"
+                                           Text="{Binding StatusText}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </TabItem>
+            <TabItem Header="Views" AutomationProperties.AutomationId="ViewsTab" AutomationProperties.Name="Views">
+                <ListBox AutomationProperties.AutomationId="ViewsList"
+                         AutomationProperties.Name="Selected database views"
+                         ItemsSource="{Binding ViewNames}"/>
+            </TabItem>
+        </TabControl>
+
+        <StackPanel Grid.Row="3" Margin="5">
+            <Separator/>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                <mah:ToggleSwitch AutomationProperties.AutomationId="CopySchemaToggle"
+                                  AutomationProperties.Name="Copy schema"
+                                  Margin="0,0,12,0"
+                                  IsOn="{Binding CopySchema}">Schema</mah:ToggleSwitch>
+                <mah:ToggleSwitch AutomationProperties.AutomationId="CopyDataToggle"
+                                  AutomationProperties.Name="Copy data"
+                                  Margin="0,0,12,0"
+                                  IsOn="{Binding CopyData}">Data</mah:ToggleSwitch>
+                <mah:ToggleSwitch AutomationProperties.AutomationId="DropDestinationDatabaseToggle"
+                                  AutomationProperties.Name="Drop destination database before copy"
+                                  Margin="0,0,12,0"
+                                  IsOn="{Binding DropDestinationDatabase}">Drop destination database</mah:ToggleSwitch>
+                <mah:ToggleSwitch AutomationProperties.AutomationId="CopyWithNewNameToggle"
+                                  AutomationProperties.Name="Copy with new destination database name"
+                                  IsOn="{Binding CopyWithNewName}">Copy with new name</mah:ToggleSwitch>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                <Label VerticalAlignment="Center">Destination database name</Label>
+                <TextBox AutomationProperties.AutomationId="DestinationDatabaseNameTextBox"
+                         AutomationProperties.Name="Destination database name"
+                         Width="280"
+                         Margin="8,0,12,0"
+                         Text="{Binding DestinationDatabaseName, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label VerticalAlignment="Center" Content="{Binding EffectiveDestinationDatabaseName}"/>
+            </StackPanel>
+            <TextBlock AutomationProperties.AutomationId="MainErrorText"
+                       AutomationProperties.Name="{Binding Error}"
+                       Foreground="Red"
+                       Text="{Binding Error}"
+                       TextWrapping="Wrap"/>
+            <Button AutomationProperties.AutomationId="CopySelectedDatabaseButton"
+                    AutomationProperties.Name="Copy selected database"
+                    Margin="0,6,0,0"
+                    Command="{Binding CopySelectedDatabaseCommand}">Copy Selected Database</Button>
+        </StackPanel>
+
+        <StatusBar Grid.Row="4">
+            <Separator/>
+            <StatusBarItem>User:</StatusBarItem>
+            <StatusBarItem Content="{x:Static system:Environment.UserDomainName}"/>
+            <StatusBarItem Content="{x:Static system:Environment.UserName}"/>
+            <Separator/>
+            <StatusBarItem Content="{Binding SelectedDatabase}"/>
+        </StatusBar>
+    </Grid>
+</mah:MetroWindow>
