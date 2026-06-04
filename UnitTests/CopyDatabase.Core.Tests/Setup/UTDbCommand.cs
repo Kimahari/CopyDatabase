@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using System.Data;
 
 namespace CopyDatabase.Core.Tests.Setup
@@ -20,7 +20,6 @@ namespace CopyDatabase.Core.Tests.Setup
 
         public override void Cancel()
         {
-
         }
 
         public override int ExecuteNonQuery()
@@ -35,7 +34,6 @@ namespace CopyDatabase.Core.Tests.Setup
 
         public override void Prepare()
         {
-
         }
 
         protected override DbParameter CreateDbParameter()
