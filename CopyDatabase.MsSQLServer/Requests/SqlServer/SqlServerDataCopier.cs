@@ -1,5 +1,7 @@
 using CopyDatabase.Core.Requests;
 
+using System.Diagnostics.CodeAnalysis;
+
 using Microsoft.Data.SqlClient;
 
 namespace CopyDatabase.MsSQLServer.Requests.SqlServer;
@@ -20,11 +22,11 @@ internal sealed class SqlServerDataCopier
             cancellationToken.ThrowIfCancellationRequested();
             SqlServerCopyProgress.ReportTable(request, table, $"Copying data {counter} of {tables.Count}");
 
-            await SqlServerDatabaseCatalog.ExecuteNonQueryAsync(destinationConnection, transaction, $"DELETE FROM {table.QualifiedName};", cancellationToken);
+            await SqlServerDatabaseCatalog.ExecuteNonQueryAsync(destinationConnection, transaction, BuildDeleteAllSql(table), cancellationToken);
 
             await using var sourceConnection = new SqlConnection(sourceConnectionString);
             await sourceConnection.OpenAsync(cancellationToken);
-            await using var command = new SqlCommand($"SELECT * FROM {table.QualifiedName};", sourceConnection);
+            await using var command = new SqlCommand(BuildSelectAllSql(table), sourceConnection);
             command.CommandTimeout = 9000;
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
@@ -44,6 +46,24 @@ internal sealed class SqlServerDataCopier
             await bulkCopy.WriteToServerAsync(reader, cancellationToken);
             counter++;
         }
+    }
+
+    [SuppressMessage(
+        "Security",
+        "S2077:SQL queries should not be vulnerable to injection attacks",
+        Justification = "Schema and table names are loaded from SQL Server catalog metadata and escaped with QUOTENAME-equivalent brackets before being composed.")]
+    internal static string BuildDeleteAllSql(SqlServerSchemaObject table)
+    {
+        return $"DELETE FROM {table.QualifiedName};";
+    }
+
+    [SuppressMessage(
+        "Security",
+        "S2077:SQL queries should not be vulnerable to injection attacks",
+        Justification = "Schema and table names are loaded from SQL Server catalog metadata and escaped with QUOTENAME-equivalent brackets before being composed.")]
+    internal static string BuildSelectAllSql(SqlServerSchemaObject table)
+    {
+        return $"SELECT * FROM {table.QualifiedName};";
     }
 }
 

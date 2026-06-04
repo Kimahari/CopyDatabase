@@ -328,13 +328,11 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         }
         catch (JsonException)
         {
-            document?.Dispose();
             document = null;
             return false;
         }
         catch (IOException)
         {
-            document?.Dispose();
             document = null;
             return false;
         }
