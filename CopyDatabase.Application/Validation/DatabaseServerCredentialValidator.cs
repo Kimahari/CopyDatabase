@@ -1,8 +1,11 @@
 ﻿using FluentValidation;
 
-namespace CopyDatabase.Core.Validation {
-    internal sealed class DatabaseServerCredentialValidator : AbstractValidator<IDatabaseServerCredentials> {
-        public DatabaseServerCredentialValidator() {
+namespace CopyDatabase.Core.Validation
+{
+    internal sealed class DatabaseServerCredentialValidator : AbstractValidator<IDatabaseServerCredentials>
+    {
+        public DatabaseServerCredentialValidator()
+        {
             RuleFor(x => x.DataSource).NotEmpty().WithMessage("Source is required");
 
             RuleFor(oo => oo.UserName).NotEmpty().When(oo => oo.UseWindowsAuth == false).WithMessage("Username is required"); ;

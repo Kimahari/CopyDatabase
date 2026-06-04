@@ -14,12 +14,25 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace CopyDatabase; 
+namespace CopyDatabase;
+
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : MetroWindow {
-    public MainWindow() {
+public partial class MainWindow : MetroWindow
+{
+    public MainWindow()
+    {
         InitializeComponent();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        if (DataContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        base.OnClosed(e);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System.Data.Common;
 using System.Data;
 
-namespace CopyDatabase.Core.Tests.Setup {
-    public class UTDbConnection : DbConnection {
+namespace CopyDatabase.Core.Tests.Setup
+{
+    public class UTDbConnection : DbConnection
+    {
         public override string ConnectionString { get; set; } = string.Empty;
 
         private string database = "";
@@ -20,26 +22,31 @@ namespace CopyDatabase.Core.Tests.Setup {
 
         public bool CanConnect { get; set; } = true;
 
-        public override void ChangeDatabase(string databaseName) {
+        public override void ChangeDatabase(string databaseName)
+        {
             database = databaseName;
         }
 
-        public override void Close() {
+        public override void Close()
+        {
             state = ConnectionState.Closed;
         }
 
-        public override void Open() {
+        public override void Open()
+        {
             if (!CanConnect) return;
             state = ConnectionState.Open;
         }
 
-        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) {
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+        {
             return Mock.Of<DbTransaction>();
         }
 
         internal UTDbCommand dbCommand = new UTDbCommand();
 
-        protected override DbCommand CreateDbCommand() {
+        protected override DbCommand CreateDbCommand()
+        {
             return dbCommand;
         }
     }

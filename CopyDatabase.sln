@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32519.111
@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{52A27B73-8FDB-400D-BE11-343743C49D36}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CopyDatabase.MsSQLServer.Tests", "UnitTests\CopyDatabase.MsSQLServer.Tests\CopyDatabase.MsSQLServer.Tests.csproj", "{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{53DDE186-6E8D-47AE-87DC-2B3995B43B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53DDE186-6E8D-47AE-87DC-2B3995B43B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53DDE186-6E8D-47AE-87DC-2B3995B43B6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{43FABF35-D224-4D88-B9C1-B071CE4A6C9F} = {E6DC192E-16A2-4E2C-8E22-5BDE8C8E7B3F}
 		{531DF481-637C-409A-AE10-A4E4888CFC20} = {987A1B74-86D3-4547-AD34-581B7370EABD}
 		{53DDE186-6E8D-47AE-87DC-2B3995B43B6D} = {D84E502C-21C6-4E0E-BD08-A0C4393E04CD}
+		{F39CE75A-68CE-4FAF-9C9B-B84ECFA39316} = {D84E502C-21C6-4E0E-BD08-A0C4393E04CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BAEAAB7-CC7D-4E04-B295-C87155788EAF}

@@ -1,56 +1,65 @@
-using CopyDatabase.Core.Tests.Setup;
-using System.Security;
-
 namespace CopyDatabase.Core.Requests.Tests;
 
 public sealed class GetSchemaObjectListCommandHandlerTests
 {
     [Fact]
-    public async Task ShouldRequestBaseTablesFromSelectedDatabase()
+    public async Task ShouldRequestBaseTablesFromSelectedDatabaseThroughProviderCatalog()
     {
-        var connection = new UTDbConnection();
-        var connectionStringBuilder = new Mock<IConnectionStringBuilder>();
-        connectionStringBuilder
-            .Setup(oo => oo.BuildConnection(It.IsAny<IDatabaseServerCredentials>(), "CopyDatabaseSourceTest"))
-            .Returns("table-connection".ToSecureString());
+        var catalogProvider = new FakeDatabaseCatalogProvider { SchemaObjectNames = ["dbo.CopyDatabaseUiTable"] };
+        var sut = new GetSchemaObjectListCommandHandler(Mock.Of<IDatabaseCatalogProviderFactory>(
+            oo => oo.GetDatabaseCatalogProvider(DatabaseProvider.MsSQLServer) == catalogProvider));
 
-        var sut = new GetSchemaObjectListCommandHandler(
-            Mock.Of<IDbConnectionFactory>(oo => oo.GetDbConnection(It.IsAny<SecureString>(), DatabaseProvider.MsSQLServer) == connection),
-            Mock.Of<IConnectionStringBuilderFactory>(oo => oo.GetConnectionStringBuilder(DatabaseProvider.MsSQLServer) == connectionStringBuilder.Object));
-
-        await sut.Handle(new GetSchemaObjectList
+        var result = await sut.Handle(new GetSchemaObjectList
         {
             DatabaseName = "CopyDatabaseSourceTest",
             ObjectType = SchemaObjectType.Table,
             ServerCredentials = new DatabaseServerTestCredentials { DataSource = "127.0.0.1,14333" }
         }, CancellationToken.None);
 
-        Assert.Contains("INFORMATION_SCHEMA.TABLES", connection.dbCommand.CommandText);
-        Assert.Contains("TABLE_TYPE = 'BASE TABLE'", connection.dbCommand.CommandText);
-        connectionStringBuilder.Verify(oo => oo.BuildConnection(It.IsAny<IDatabaseServerCredentials>(), "CopyDatabaseSourceTest"));
+        Assert.Equal(["dbo.CopyDatabaseUiTable"], result);
+        Assert.Equal("CopyDatabaseSourceTest", catalogProvider.DatabaseName);
+        Assert.Equal(SchemaObjectType.Table, catalogProvider.ObjectType);
     }
 
     [Fact]
-    public async Task ShouldRequestViewsFromSelectedDatabase()
+    public async Task ShouldRequestViewsFromSelectedDatabaseThroughProviderCatalog()
     {
-        var connection = new UTDbConnection();
-        var connectionStringBuilder = new Mock<IConnectionStringBuilder>();
-        connectionStringBuilder
-            .Setup(oo => oo.BuildConnection(It.IsAny<IDatabaseServerCredentials>(), "CopyDatabaseSourceTest"))
-            .Returns("view-connection".ToSecureString());
+        var catalogProvider = new FakeDatabaseCatalogProvider { SchemaObjectNames = ["dbo.CopyDatabaseUiView"] };
+        var sut = new GetSchemaObjectListCommandHandler(Mock.Of<IDatabaseCatalogProviderFactory>(
+            oo => oo.GetDatabaseCatalogProvider(DatabaseProvider.MsSQLServer) == catalogProvider));
 
-        var sut = new GetSchemaObjectListCommandHandler(
-            Mock.Of<IDbConnectionFactory>(oo => oo.GetDbConnection(It.IsAny<SecureString>(), DatabaseProvider.MsSQLServer) == connection),
-            Mock.Of<IConnectionStringBuilderFactory>(oo => oo.GetConnectionStringBuilder(DatabaseProvider.MsSQLServer) == connectionStringBuilder.Object));
-
-        await sut.Handle(new GetSchemaObjectList
+        var result = await sut.Handle(new GetSchemaObjectList
         {
             DatabaseName = "CopyDatabaseSourceTest",
             ObjectType = SchemaObjectType.View,
             ServerCredentials = new DatabaseServerTestCredentials { DataSource = "127.0.0.1,14333" }
         }, CancellationToken.None);
 
-        Assert.Contains("INFORMATION_SCHEMA.VIEWS", connection.dbCommand.CommandText);
-        connectionStringBuilder.Verify(oo => oo.BuildConnection(It.IsAny<IDatabaseServerCredentials>(), "CopyDatabaseSourceTest"));
+        Assert.Equal(["dbo.CopyDatabaseUiView"], result);
+        Assert.Equal("CopyDatabaseSourceTest", catalogProvider.DatabaseName);
+        Assert.Equal(SchemaObjectType.View, catalogProvider.ObjectType);
+    }
+
+    private sealed class FakeDatabaseCatalogProvider : IDatabaseCatalogProvider
+    {
+        public string[] SchemaObjectNames { get; set; } = [];
+        public string DatabaseName { get; private set; } = "";
+        public SchemaObjectType ObjectType { get; private set; }
+
+        public Task<string[]> GetDatabaseNamesAsync(IDatabaseServerCredentials credentials, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task<string[]> GetSchemaObjectNamesAsync(
+            IDatabaseServerCredentials credentials,
+            string databaseName,
+            SchemaObjectType objectType,
+            CancellationToken cancellationToken)
+        {
+            DatabaseName = databaseName;
+            ObjectType = objectType;
+            return Task.FromResult(SchemaObjectNames);
+        }
     }
 }

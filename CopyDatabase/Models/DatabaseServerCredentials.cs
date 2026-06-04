@@ -1,7 +1,7 @@
 ﻿namespace CopyDatabase.Models;
 
-[INotifyPropertyChanged]
-internal partial class DatabaseServerCredentials : IDatabaseServerCredentials {
+internal partial class DatabaseServerCredentials : ObservableObject, IDatabaseServerCredentials
+{
     [ObservableProperty]
     string dataSource = "";
 
@@ -13,5 +13,5 @@ internal partial class DatabaseServerCredentials : IDatabaseServerCredentials {
     [NotifyPropertyChangedFor(nameof(UseWindowsAuth))]
     SecureString password = new();
 
-    public bool UseWindowsAuth => userName.Length == 0 && password.Length == 0;
+    public bool UseWindowsAuth => UserName.Length == 0 && Password.Length == 0;
 }

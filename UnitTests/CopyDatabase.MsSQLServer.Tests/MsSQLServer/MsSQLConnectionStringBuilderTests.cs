@@ -1,6 +1,4 @@
-using CopyDatabase.MsSQLServer;
-
-namespace CopyDatabase.Core.Tests.MsSQLServer;
+namespace CopyDatabase.MsSQLServer.Tests.MsSQLServer;
 
 public sealed class MsSQLConnectionStringBuilderTests
 {

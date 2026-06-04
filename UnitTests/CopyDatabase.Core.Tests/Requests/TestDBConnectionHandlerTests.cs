@@ -1,57 +1,60 @@
-﻿using Xunit;
-using CopyDatabase.Core.Requests;
+namespace CopyDatabase.Core.Requests.Tests;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CopyDatabase.Core.Tests.Setup;
-using System.Security;
-using FluentValidation;
-using System.ComponentModel.DataAnnotations;
+public sealed class TestDBConnectionHandlerTests
+{
+    [Fact]
+    public async Task ReturnTrueWhenProviderCanConnect()
+    {
+        var connectionTester = new FakeDatabaseConnectionTester { CanConnect = true };
+        var sut = new TestDBConnectionHandler(
+            new DatabaseServerCredentialValidator(),
+            Mock.Of<IDatabaseConnectionTesterFactory>(
+                oo => oo.GetDatabaseConnectionTester(DatabaseProvider.MsSQLServer) == connectionTester));
 
-namespace CopyDatabase.Core.Requests.Tests {
-    public class TestDBConnectionHandlerTests {
-        [Fact()]
-        public async Task ReturnTrueWhenDatabaseCanConnect() {
-            var dbConnectionMock = new UTDbConnection();
+        var result = await sut.Handle(new TestDBConnection
+        {
+            Credentials = new DatabaseServerTestCredentials
+            {
+                UseWindowsAuth = true,
+                DataSource = "."
+            },
+        }, CancellationToken.None);
 
-            var sut = new TestDBConnectionHandler(
-                new DatabaseServerCredentialValidator(),
-                Mock.Of<IDbConnectionFactory>(oo => oo.GetDbConnection(It.IsAny<SecureString>(), It.IsAny<DatabaseProvider>()) == dbConnectionMock),
-                Mock.Of<IConnectionStringBuilderFactory>(oo => oo.GetConnectionStringBuilder(It.IsAny<DatabaseProvider>()) == Mock.Of<IConnectionStringBuilder>())
-            );
+        Assert.True(result);
+        Assert.True(connectionTester.ConnectionTested);
+    }
 
-            var result = await sut.Handle(new TestDBConnection() {
-                Credentials = new DatabaseServerTestCredentials() {
-                    UseWindowsAuth = true,
-                    DataSource = "."
-                },
-            }, CancellationToken.None);
+    [Fact]
+    public async Task ReturnFalseWhenProviderCannotConnect()
+    {
+        var connectionTester = new FakeDatabaseConnectionTester { CanConnect = false };
+        var sut = new TestDBConnectionHandler(
+            new DatabaseServerCredentialValidator(),
+            Mock.Of<IDatabaseConnectionTesterFactory>(
+                oo => oo.GetDatabaseConnectionTester(DatabaseProvider.MsSQLServer) == connectionTester));
 
-            Assert.True(result);
-        }
+        var result = await sut.Handle(new TestDBConnection
+        {
+            Credentials = new DatabaseServerTestCredentials
+            {
+                UseWindowsAuth = true,
+                DataSource = "."
+            },
+        }, CancellationToken.None);
 
+        Assert.False(result);
+        Assert.True(connectionTester.ConnectionTested);
+    }
 
-        [Fact()]
-        public async Task ReturnTrueWhenDatabaseCannotConnect() {
-            var dbConnectionMock = new UTDbConnection() { CanConnect = false };
+    private sealed class FakeDatabaseConnectionTester : IDatabaseConnectionTester
+    {
+        public bool CanConnect { get; set; }
+        public bool ConnectionTested { get; private set; }
 
-            var sut = new TestDBConnectionHandler(
-                new DatabaseServerCredentialValidator(),
-                Mock.Of<IDbConnectionFactory>(oo => oo.GetDbConnection(It.IsAny<SecureString>(), It.IsAny<DatabaseProvider>()) == dbConnectionMock),
-                Mock.Of<IConnectionStringBuilderFactory>(oo => oo.GetConnectionStringBuilder(It.IsAny<DatabaseProvider>()) == Mock.Of<IConnectionStringBuilder>())
-            );
-
-            var result = await sut.Handle(new TestDBConnection() {
-                Credentials = new DatabaseServerTestCredentials() {
-                    UseWindowsAuth = true,
-                    DataSource = "."
-                },
-            }, CancellationToken.None);
-
-            Assert.False(result);
+        public Task<bool> TestConnectionAsync(IDatabaseServerCredentials credentials, CancellationToken cancellationToken)
+        {
+            ConnectionTested = true;
+            return Task.FromResult(CanConnect);
         }
     }
 }

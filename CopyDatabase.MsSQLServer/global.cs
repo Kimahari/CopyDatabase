@@ -1,5 +1,3 @@
-﻿global using System;
-global using System.Threading;
-global using System.Threading.Tasks;
-global using CopyDatabase.Common;
-global using System.Security;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("CopyDatabase.MsSQLServer.Tests")]

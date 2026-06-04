@@ -4,17 +4,21 @@ using System.Text;
 
 namespace CopyDatabase.MsSQLServer;
 
-public sealed class MsSQLConnectionStringBuilder : IConnectionStringBuilder {
-    public SecureString BuildConnection(IDatabaseServerCredentials credentials, string databaseName = "") {
+public sealed class MsSQLConnectionStringBuilder : IConnectionStringBuilder
+{
+    public SecureString BuildConnection(IDatabaseServerCredentials credentials, string databaseName = "")
+    {
         string intergrated = credentials.UseWindowsAuth ? "SSPI" : "False";
 
         StringBuilder builder = new($"Data Source={credentials.DataSource};Integrated Security={intergrated};Encrypt=False;");
 
-        if (!string.IsNullOrEmpty(credentials.UserName)) {
+        if (!string.IsNullOrEmpty(credentials.UserName))
+        {
             builder.Append($"User ID={credentials.UserName};Password={credentials.Password.FromSecureString()};");
         }
 
-        if (!string.IsNullOrEmpty(databaseName)) {
+        if (!string.IsNullOrEmpty(databaseName))
+        {
             builder.Append($"Initial Catalog={databaseName};");
         }
 

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CopyDatabase.Helpers {
-    public static class PasswordHelper {
+namespace CopyDatabase.Helpers
+{
+    public static class PasswordHelper
+    {
 
         #region Private Fields
 
@@ -20,45 +22,54 @@ namespace CopyDatabase.Helpers {
         #region Private Methods
 
         private static void Attach(DependencyObject sender,
-            DependencyPropertyChangedEventArgs e) {
+            DependencyPropertyChangedEventArgs e)
+        {
             PasswordBox passwordBox = sender as PasswordBox;
 
-            if (passwordBox == null) {
+            if (passwordBox == null)
+            {
                 return;
             }
 
-            if ((bool)e.OldValue) {
+            if ((bool)e.OldValue)
+            {
                 passwordBox.PasswordChanged -= PasswordChanged;
             }
 
-            if ((bool)e.NewValue) {
+            if ((bool)e.NewValue)
+            {
                 passwordBox.PasswordChanged += PasswordChanged;
             }
         }
 
-        private static bool GetIsUpdating(DependencyObject dp) {
+        private static bool GetIsUpdating(DependencyObject dp)
+        {
             return (bool)dp.GetValue(IsUpdatingProperty);
         }
 
         private static void OnPasswordPropertyChanged(DependencyObject sender,
-            DependencyPropertyChangedEventArgs e) {
+            DependencyPropertyChangedEventArgs e)
+        {
             PasswordBox passwordBox = sender as PasswordBox;
             passwordBox.PasswordChanged -= PasswordChanged;
 
-            if (!GetIsUpdating(passwordBox)) {
+            if (!GetIsUpdating(passwordBox))
+            {
                 passwordBox.Password = (string)e.NewValue;
             }
             passwordBox.PasswordChanged += PasswordChanged;
         }
 
-        private static void PasswordChanged(object sender, RoutedEventArgs e) {
+        private static void PasswordChanged(object sender, RoutedEventArgs e)
+        {
             PasswordBox passwordBox = sender as PasswordBox;
             SetIsUpdating(passwordBox, true);
             SetPassword(passwordBox, passwordBox.Password);
             SetIsUpdating(passwordBox, false);
         }
 
-        private static void SetIsUpdating(DependencyObject dp, bool value) {
+        private static void SetIsUpdating(DependencyObject dp, bool value)
+        {
             dp.SetValue(IsUpdatingProperty, value);
         }
 
@@ -79,19 +90,23 @@ namespace CopyDatabase.Helpers {
 
         #region Public Methods
 
-        public static bool GetAttach(DependencyObject dp) {
+        public static bool GetAttach(DependencyObject dp)
+        {
             return (bool)dp.GetValue(AttachProperty);
         }
 
-        public static string GetPassword(DependencyObject dp) {
+        public static string GetPassword(DependencyObject dp)
+        {
             return (string)dp.GetValue(PasswordProperty);
         }
 
-        public static void SetAttach(DependencyObject dp, bool value) {
+        public static void SetAttach(DependencyObject dp, bool value)
+        {
             dp.SetValue(AttachProperty, value);
         }
 
-        public static void SetPassword(DependencyObject dp, string value) {
+        public static void SetPassword(DependencyObject dp, string value)
+        {
             dp.SetValue(PasswordProperty, value);
         }
 
