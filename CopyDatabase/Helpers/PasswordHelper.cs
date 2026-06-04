@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,6 @@ namespace CopyDatabase.Helpers
 {
     public static class PasswordHelper
     {
-
         #region Private Fields
 
         private static readonly DependencyProperty IsUpdatingProperty =

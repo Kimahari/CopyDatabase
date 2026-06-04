@@ -10,7 +10,6 @@ namespace CopyDatabase.Core
 {
     public static class ServiceExtensions
     {
-
         /// <summary>
         /// Registers the core services.
         /// </summary>
