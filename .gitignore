@@ -5,4 +5,9 @@ obj
 /CopyDatabaseInstaller/Debug
 /CopyDatabaseInstaller/Release
 /*.user
+/app-main.conf
+/server-dest.conf
+/server-source.conf
 !publish/
+!Publish/
+!Publish/**

@@ -1,5 +1,6 @@
 # Copy Database
-A Simple Tool To Copy a Database from one MsSQL Server to Another
+
+A Windows desktop tool for copying one or more Microsoft SQL Server databases from a source server to a destination server.
 
 [![BCH compliance](https://bettercodehub.com/edge/badge/Kimahari/CopyDatabase?branch=master)](https://bettercodehub.com/)
 
@@ -7,31 +8,36 @@ A Simple Tool To Copy a Database from one MsSQL Server to Another
 
 ## Download
 
-This application uses Click once deployment packaging to install please use the following [CopyDatabase.application](https://github.com/Kimahari/CopyDatabase/releases/download/1.0.0.11/CopyDatabase.application)
+Copy Database is published with ClickOnce. Download the current installer from the repository publish folder:
 
-Please note at the moment still trying to get a code signing certificate sorted so windows will display an untrusted publisher when running the application.
+[Publish folder](https://github.com/Kimahari/CopyDatabase/tree/master/Publish) | [CopyDatabase.application](https://github.com/Kimahari/CopyDatabase/blob/master/Publish/CopyDatabase.application)
 
-## Using the application
+The ClickOnce application artifacts are prepared in `Publish/` so they can be reviewed and signed through the SignPath Foundation process before release. Signing is provided by the SignPath Foundation; do not publish unsigned release artifacts as the final public installer.
 
-1) Once the application have been started you will see the following window.
+## Publishing
 
-![alt text](Resources/ApplicationStart.png)
+Use the `ClickOnceProfile` publish profile from Visual Studio or MSBuild. The profile publishes to the repository-local `Publish/` folder and configures the install URL for the GitHub-hosted publish artifacts.
 
-* Source : Source Database Server where you whould like to copy one or more databases from
-* Destination : Destination Database server where you whould like to copy one or more databases too.
-* Load Databases : Loads the Databases from the source Database server
-* Wrench Buttons : Advanced Configuration for the Database server sources (User name passwords)
+After publishing, send the generated ClickOnce artifacts through SignPath Foundation for code signing, then commit the signed `Publish/` output.
 
-2) Once The databases have been loaded the user will have access to select one or more database to copy from one source to another.
+## Using the Application
 
-![alt text](Resources/ApplicationLoaded.png)
+When the application starts, enter or edit the source and destination SQL Server connection details, then connect to each server.
 
-3) To initialize the copy process click the copy database command at the bottom of the screen **Note** - The databases in the destination server gets dropped once the copy process is started *Please ensure to backup all destination databases before hand...*.
+![Copy Database main window](Resources/ApplicationStart.png)
 
-![alt text](Resources/ApplicationCopyStart.png)
+The server credential editor supports SQL credentials or Windows authentication.
 
-# Known Issues
+![Edit server credentials](Resources/ApplicationCredentials.png)
 
-1) Application Crash when Load database is clicked with one or more unconfigured / invalid server sources
-2) Copy Database button is not disabled when copy start.
-3) Stored proceduces and views fail to copy over when there are references to tables that do not exists (need a continue on failure for these scenarios) .
+After connecting, load the source databases, choose a source database, select the tables or views to copy, and configure the copy options. The current workflow supports copying schema, copying data, dropping the destination database before copy, and copying into a new destination database name.
+
+![Copy options](Resources/ApplicationCopyOptions.png)
+
+Use **Copy Selected Database** to start the copy process. If **Drop destination database** is enabled, the destination database is dropped before the copy starts. Back up destination databases before running a destructive copy.
+
+## Known Issues
+
+1. The application can still fail when loading databases from unconfigured or invalid server sources.
+2. Copy progress and failure handling still need more resilient user feedback.
+3. Stored procedures and views can fail to copy when they reference missing objects; the copy workflow still needs a continue-on-failure path for those scenarios.
