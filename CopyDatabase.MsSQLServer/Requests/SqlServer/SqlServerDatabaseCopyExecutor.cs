@@ -44,6 +44,7 @@ internal sealed class SqlServerDatabaseCopyExecutor : IDatabaseCopyExecutor
         string destinationDatabaseConnection = BuildConnection(request.DestinationCredentials, destinationDatabaseName);
 
         var tables = await catalog.LoadTablesAsync(sourceConnection, cancellationToken);
+        var foreignKeys = await catalog.LoadScriptedObjectsAsync(sourceConnection, SqlServerSql.ForeignKeys, cancellationToken);
         var views = await catalog.LoadScriptedObjectsAsync(sourceConnection, SqlServerSql.Views, cancellationToken);
         var routines = await catalog.LoadScriptedObjectsAsync(sourceConnection, SqlServerSql.Routines, cancellationToken);
 
@@ -66,7 +67,7 @@ internal sealed class SqlServerDatabaseCopyExecutor : IDatabaseCopyExecutor
         {
             if (request.CopySchema)
             {
-                await schemaCopier.CopyAsync(request, sourceConnection, destinationConnection, transaction, tables, routines, views, cancellationToken);
+                await schemaCopier.CopyAsync(request, sourceConnection, destinationConnection, transaction, tables, foreignKeys, routines, views, cancellationToken);
             }
 
             if (request.CopyData)

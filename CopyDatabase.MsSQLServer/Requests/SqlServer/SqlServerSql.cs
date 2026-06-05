@@ -27,6 +27,59 @@ FROM INFORMATION_SCHEMA.ROUTINES r
 INNER JOIN sys.sql_modules m ON m.object_id = OBJECT_ID(r.SPECIFIC_SCHEMA + '.' + r.SPECIFIC_NAME)
 ORDER BY r.SPECIFIC_SCHEMA, r.SPECIFIC_NAME;";
 
+    public const string ForeignKeys = @"
+SELECT
+    SCHEMA_NAME(fk.schema_id),
+    fk.name,
+    'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.parent_object_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) +
+    ' WITH CHECK ADD CONSTRAINT ' + QUOTENAME(fk.name) +
+    ' FOREIGN KEY (' +
+        STUFF((
+            SELECT ', ' + QUOTENAME(parent_column.name)
+            FROM sys.foreign_key_columns foreign_key_column
+            INNER JOIN sys.columns parent_column
+                ON parent_column.object_id = foreign_key_column.parent_object_id
+               AND parent_column.column_id = foreign_key_column.parent_column_id
+            WHERE foreign_key_column.constraint_object_id = fk.object_id
+            ORDER BY foreign_key_column.constraint_column_id
+            FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
+    ') REFERENCES ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.referenced_object_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.referenced_object_id)) +
+    ' (' +
+        STUFF((
+            SELECT ', ' + QUOTENAME(referenced_column.name)
+            FROM sys.foreign_key_columns foreign_key_column
+            INNER JOIN sys.columns referenced_column
+                ON referenced_column.object_id = foreign_key_column.referenced_object_id
+               AND referenced_column.column_id = foreign_key_column.referenced_column_id
+            WHERE foreign_key_column.constraint_object_id = fk.object_id
+            ORDER BY foreign_key_column.constraint_column_id
+            FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
+    ')' +
+    CASE fk.delete_referential_action
+        WHEN 1 THEN ' ON DELETE CASCADE'
+        WHEN 2 THEN ' ON DELETE SET NULL'
+        WHEN 3 THEN ' ON DELETE SET DEFAULT'
+        ELSE ''
+    END +
+    CASE fk.update_referential_action
+        WHEN 1 THEN ' ON UPDATE CASCADE'
+        WHEN 2 THEN ' ON UPDATE SET NULL'
+        WHEN 3 THEN ' ON UPDATE SET DEFAULT'
+        ELSE ''
+    END +
+    CASE WHEN fk.is_not_for_replication = 1 THEN ' NOT FOR REPLICATION' ELSE '' END +
+    ';' + CHAR(13) +
+    'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.parent_object_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) +
+    ' CHECK CONSTRAINT ' + QUOTENAME(fk.name) + ';'
+FROM sys.foreign_keys fk
+INNER JOIN sys.tables parent_table ON parent_table.object_id = fk.parent_object_id
+INNER JOIN sys.tables referenced_table ON referenced_table.object_id = fk.referenced_object_id
+WHERE parent_table.is_ms_shipped = 0
+  AND referenced_table.is_ms_shipped = 0
+  AND parent_table.name NOT IN ('sysdiagrams')
+  AND referenced_table.name NOT IN ('sysdiagrams')
+ORDER BY SCHEMA_NAME(fk.schema_id), fk.name;";
+
     public const string CreateTableScript = @"
 DECLARE @table_name SYSNAME
 SELECT @table_name = '{Schema}.{Name}'
