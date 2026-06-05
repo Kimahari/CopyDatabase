@@ -21,12 +21,14 @@ internal sealed class SqlServerSchemaCopier
         SqlConnection destinationConnection,
         SqlTransaction transaction,
         IReadOnlyCollection<SqlServerSchemaObject> tables,
+        IReadOnlyCollection<SqlServerSchemaObject> foreignKeys,
         IReadOnlyCollection<SqlServerSchemaObject> routines,
         IReadOnlyCollection<SqlServerSchemaObject> views,
         CancellationToken cancellationToken)
     {
         await catalog.EnsureSchemasCreatedAsync(destinationConnection, transaction, tables.Select(oo => oo.Schema), cancellationToken);
         await CopyTableSchemasAsync(request, sourceConnectionString, destinationConnection, transaction, tables, cancellationToken);
+        await CopyScriptedObjectsAsync(request, destinationConnection, transaction, foreignKeys, "foreign key", cancellationToken, "F");
         await CopyScriptedObjectsAsync(request, destinationConnection, transaction, routines, "routine", cancellationToken);
         await CopyScriptedObjectsAsync(request, destinationConnection, transaction, views, "view", cancellationToken);
     }
@@ -63,13 +65,14 @@ internal sealed class SqlServerSchemaCopier
         SqlTransaction transaction,
         IReadOnlyCollection<SqlServerSchemaObject> objects,
         string objectType,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? sqlObjectType = null)
     {
         int counter = 1;
         foreach (var item in objects)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (await catalog.ObjectExistsAsync(connection, transaction, item, cancellationToken))
+            if (await catalog.ObjectExistsAsync(connection, transaction, item, cancellationToken, sqlObjectType))
             {
                 SqlServerCopyProgress.Report(request, $"Skipping existing {objectType} {counter} of {objects.Count} ({item.QualifiedName})");
                 counter++;
