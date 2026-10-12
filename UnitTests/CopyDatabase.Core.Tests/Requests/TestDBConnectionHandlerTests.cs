@@ -1,20 +1,16 @@
 namespace CopyDatabase.Core.Requests.Tests;
 
-public sealed class TestDBConnectionHandlerTests
-{
+public sealed class TestDBConnectionHandlerTests {
     [Fact]
-    public async Task ReturnTrueWhenProviderCanConnect()
-    {
+    public async Task ReturnTrueWhenProviderCanConnect () {
         var connectionTester = new FakeDatabaseConnectionTester { CanConnect = true };
         var sut = new TestDBConnectionHandler(
             new DatabaseServerCredentialValidator(),
             Mock.Of<IDatabaseConnectionTesterFactory>(
                 oo => oo.GetDatabaseConnectionTester(DatabaseProvider.MsSQLServer) == connectionTester));
 
-        var result = await sut.Handle(new TestDBConnection
-        {
-            Credentials = new DatabaseServerTestCredentials
-            {
+        var result = await sut.Handle(new TestDBConnection {
+            Credentials = new DatabaseServerTestCredentials {
                 UseWindowsAuth = true,
                 DataSource = "."
             },
@@ -25,18 +21,15 @@ public sealed class TestDBConnectionHandlerTests
     }
 
     [Fact]
-    public async Task ReturnFalseWhenProviderCannotConnect()
-    {
+    public async Task ReturnFalseWhenProviderCannotConnect () {
         var connectionTester = new FakeDatabaseConnectionTester { CanConnect = false };
         var sut = new TestDBConnectionHandler(
             new DatabaseServerCredentialValidator(),
             Mock.Of<IDatabaseConnectionTesterFactory>(
                 oo => oo.GetDatabaseConnectionTester(DatabaseProvider.MsSQLServer) == connectionTester));
 
-        var result = await sut.Handle(new TestDBConnection
-        {
-            Credentials = new DatabaseServerTestCredentials
-            {
+        var result = await sut.Handle(new TestDBConnection {
+            Credentials = new DatabaseServerTestCredentials {
                 UseWindowsAuth = true,
                 DataSource = "."
             },
@@ -46,13 +39,11 @@ public sealed class TestDBConnectionHandlerTests
         Assert.True(connectionTester.ConnectionTested);
     }
 
-    private sealed class FakeDatabaseConnectionTester : IDatabaseConnectionTester
-    {
+    private sealed class FakeDatabaseConnectionTester : IDatabaseConnectionTester {
         public bool CanConnect { get; set; }
         public bool ConnectionTested { get; private set; }
 
-        public Task<bool> TestConnectionAsync(IDatabaseServerCredentials credentials, CancellationToken cancellationToken)
-        {
+        public Task<bool> TestConnectionAsync (IDatabaseServerCredentials credentials, CancellationToken cancellationToken) {
             ConnectionTested = true;
             return Task.FromResult(CanConnect);
         }

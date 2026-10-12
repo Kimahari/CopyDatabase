@@ -1,16 +1,13 @@
 namespace CopyDatabase.Core.Requests.Tests;
 
-public sealed class GetSchemaObjectListCommandHandlerTests
-{
+public sealed class GetSchemaObjectListCommandHandlerTests {
     [Fact]
-    public async Task ShouldRequestBaseTablesFromSelectedDatabaseThroughProviderCatalog()
-    {
+    public async Task ShouldRequestBaseTablesFromSelectedDatabaseThroughProviderCatalog () {
         var catalogProvider = new FakeDatabaseCatalogProvider { SchemaObjectNames = ["dbo.CopyDatabaseUiTable"] };
         var sut = new GetSchemaObjectListCommandHandler(Mock.Of<IDatabaseCatalogProviderFactory>(
             oo => oo.GetDatabaseCatalogProvider(DatabaseProvider.MsSQLServer) == catalogProvider));
 
-        var result = await sut.Handle(new GetSchemaObjectList
-        {
+        var result = await sut.Handle(new GetSchemaObjectList {
             DatabaseName = "CopyDatabaseSourceTest",
             ObjectType = SchemaObjectType.Table,
             ServerCredentials = new DatabaseServerTestCredentials { DataSource = "127.0.0.1,14333" }
@@ -22,14 +19,12 @@ public sealed class GetSchemaObjectListCommandHandlerTests
     }
 
     [Fact]
-    public async Task ShouldRequestViewsFromSelectedDatabaseThroughProviderCatalog()
-    {
+    public async Task ShouldRequestViewsFromSelectedDatabaseThroughProviderCatalog () {
         var catalogProvider = new FakeDatabaseCatalogProvider { SchemaObjectNames = ["dbo.CopyDatabaseUiView"] };
         var sut = new GetSchemaObjectListCommandHandler(Mock.Of<IDatabaseCatalogProviderFactory>(
             oo => oo.GetDatabaseCatalogProvider(DatabaseProvider.MsSQLServer) == catalogProvider));
 
-        var result = await sut.Handle(new GetSchemaObjectList
-        {
+        var result = await sut.Handle(new GetSchemaObjectList {
             DatabaseName = "CopyDatabaseSourceTest",
             ObjectType = SchemaObjectType.View,
             ServerCredentials = new DatabaseServerTestCredentials { DataSource = "127.0.0.1,14333" }
@@ -40,23 +35,20 @@ public sealed class GetSchemaObjectListCommandHandlerTests
         Assert.Equal(SchemaObjectType.View, catalogProvider.ObjectType);
     }
 
-    private sealed class FakeDatabaseCatalogProvider : IDatabaseCatalogProvider
-    {
+    private sealed class FakeDatabaseCatalogProvider : IDatabaseCatalogProvider {
         public string[] SchemaObjectNames { get; set; } = [];
         public string DatabaseName { get; private set; } = "";
         public SchemaObjectType ObjectType { get; private set; }
 
-        public Task<string[]> GetDatabaseNamesAsync(IDatabaseServerCredentials credentials, CancellationToken cancellationToken)
-        {
+        public Task<string[]> GetDatabaseNamesAsync (IDatabaseServerCredentials credentials, CancellationToken cancellationToken) {
             throw new NotSupportedException();
         }
 
-        public Task<string[]> GetSchemaObjectNamesAsync(
+        public Task<string[]> GetSchemaObjectNamesAsync (
             IDatabaseServerCredentials credentials,
             string databaseName,
             SchemaObjectType objectType,
-            CancellationToken cancellationToken)
-        {
+            CancellationToken cancellationToken) {
             DatabaseName = databaseName;
             ObjectType = objectType;
             return Task.FromResult(SchemaObjectNames);

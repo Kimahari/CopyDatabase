@@ -2,11 +2,9 @@ using CopyDatabase.MsSQLServer.Requests.SqlServer;
 
 namespace CopyDatabase.MsSQLServer.Tests.Requests;
 
-public sealed class SqlServerDataCopierTests
-{
+public sealed class SqlServerDataCopierTests {
     [Fact]
-    public void BuildSelectAllSql_UsesEscapedCatalogIdentifiers()
-    {
+    public void BuildSelectAllSql_UsesEscapedCatalogIdentifiers () {
         var table = new SqlServerSchemaObject("reporting]schema", "orders]archive", "");
 
         string sql = SqlServerDataCopier.BuildSelectAllSql(table);
@@ -15,8 +13,7 @@ public sealed class SqlServerDataCopierTests
     }
 
     [Fact]
-    public void BuildDeleteAllSql_UsesEscapedCatalogIdentifiers()
-    {
+    public void BuildDeleteAllSql_UsesEscapedCatalogIdentifiers () {
         var table = new SqlServerSchemaObject("reporting]schema", "orders]archive", "");
 
         string sql = SqlServerDataCopier.BuildDeleteAllSql(table);

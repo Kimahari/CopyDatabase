@@ -1,7 +1,6 @@
-﻿namespace CopyDatabase.Models;
+namespace CopyDatabase.Models;
 
-internal partial class DatabaseServerCredentials : ObservableObject, IDatabaseServerCredentials
-{
+internal partial class DatabaseServerCredentials : ObservableObject, IDatabaseServerCredentials {
     [ObservableProperty]
     string dataSource = "";
 

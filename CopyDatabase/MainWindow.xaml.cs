@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,17 +19,13 @@ namespace CopyDatabase;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : MetroWindow
-{
-    public MainWindow()
-    {
+public partial class MainWindow : MetroWindow {
+    public MainWindow () {
         InitializeComponent();
     }
 
-    protected override void OnClosed(EventArgs e)
-    {
-        if (DataContext is IDisposable disposable)
-        {
+    protected override void OnClosed (EventArgs e) {
+        if (DataContext is IDisposable disposable) {
             disposable.Dispose();
         }
 

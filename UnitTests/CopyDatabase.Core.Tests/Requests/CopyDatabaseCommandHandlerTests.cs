@@ -3,15 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CopyDatabase.Core.Tests.Requests;
 
-public sealed class CopyDatabaseCommandHandlerTests
-{
+public sealed class CopyDatabaseCommandHandlerTests {
     [Fact]
-    public async Task Handle_DelegatesRequestToExecutor()
-    {
+    public async Task Handle_DelegatesRequestToExecutor () {
         var executor = new Mock<IDatabaseCopyExecutor>();
         var executorFactory = new Mock<IDatabaseCopyExecutorFactory>();
-        var request = new CopyDatabaseRequest
-        {
+        var request = new CopyDatabaseRequest {
             SourceCredentials = Mock.Of<IDatabaseServerCredentials>(),
             DestinationCredentials = Mock.Of<IDatabaseServerCredentials>(),
             Provider = DatabaseProvider.MsSQLServer,
@@ -35,8 +32,7 @@ public sealed class CopyDatabaseCommandHandlerTests
     }
 
     [Fact]
-    public void RegisterCoreServices_ResolvesCopyExecutorFactoryUsingKeyedProviderAdapter()
-    {
+    public void RegisterCoreServices_ResolvesCopyExecutorFactoryUsingKeyedProviderAdapter () {
         var services = new ServiceCollection();
         var expectedExecutor = Mock.Of<IDatabaseCopyExecutor>();
         services.RegisterCoreServices();

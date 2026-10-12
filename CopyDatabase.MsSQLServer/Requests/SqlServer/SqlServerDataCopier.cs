@@ -6,19 +6,16 @@ using Microsoft.Data.SqlClient;
 
 namespace CopyDatabase.MsSQLServer.Requests.SqlServer;
 
-internal sealed class SqlServerDataCopier
-{
-    public async Task CopyAsync(
+internal sealed class SqlServerDataCopier {
+    public async Task CopyAsync (
         CopyDatabaseRequest request,
         string sourceConnectionString,
         SqlConnection destinationConnection,
         SqlTransaction transaction,
         IReadOnlyCollection<SqlServerSchemaObject> tables,
-        CancellationToken cancellationToken)
-    {
+        CancellationToken cancellationToken) {
         int counter = 1;
-        foreach (var table in tables)
-        {
+        foreach (var table in tables) {
             cancellationToken.ThrowIfCancellationRequested();
             SqlServerCopyProgress.ReportTable(request, table, $"Copying data {counter} of {tables.Count}");
 
@@ -30,16 +27,14 @@ internal sealed class SqlServerDataCopier
             command.CommandTimeout = 9000;
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-            using var bulkCopy = new SqlBulkCopy(destinationConnection, SqlBulkCopyOptions.Default, transaction)
-            {
+            using var bulkCopy = new SqlBulkCopy(destinationConnection, SqlBulkCopyOptions.Default, transaction) {
                 DestinationTableName = table.QualifiedName,
                 BulkCopyTimeout = 9000,
                 EnableStreaming = true,
                 NotifyAfter = 1
             };
 
-            bulkCopy.SqlRowsCopied += (_, args) =>
-            {
+            bulkCopy.SqlRowsCopied += (_, args) => {
                 SqlServerCopyProgress.ReportTable(request, table, $"Copying data {counter} of {tables.Count} - {args.RowsCopied} rows copied");
             };
 
@@ -52,8 +47,7 @@ internal sealed class SqlServerDataCopier
         "Security",
         "S2077:SQL queries should not be vulnerable to injection attacks",
         Justification = "Schema and table names are loaded from SQL Server catalog metadata and escaped with QUOTENAME-equivalent brackets before being composed.")]
-    internal static string BuildDeleteAllSql(SqlServerSchemaObject table)
-    {
+    internal static string BuildDeleteAllSql (SqlServerSchemaObject table) {
         return $"DELETE FROM {table.QualifiedName};";
     }
 
@@ -61,8 +55,7 @@ internal sealed class SqlServerDataCopier
         "Security",
         "S2077:SQL queries should not be vulnerable to injection attacks",
         Justification = "Schema and table names are loaded from SQL Server catalog metadata and escaped with QUOTENAME-equivalent brackets before being composed.")]
-    internal static string BuildSelectAllSql(SqlServerSchemaObject table)
-    {
+    internal static string BuildSelectAllSql (SqlServerSchemaObject table) {
         return $"SELECT * FROM {table.QualifiedName};";
     }
 }

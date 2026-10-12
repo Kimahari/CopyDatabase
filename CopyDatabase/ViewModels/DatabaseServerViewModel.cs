@@ -1,4 +1,4 @@
-﻿
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -11,8 +11,7 @@ using MahApps.Metro.Controls.Dialogs;
 
 namespace CopyDatabase.ViewModels;
 
-internal sealed partial class DatabaseServerViewModel : ObservableObject
-{
+internal sealed partial class DatabaseServerViewModel : ObservableObject {
     private CancellationTokenSource ts = new();
     private IMediator mediator;
     private readonly IDialogCoordinator _dialogCoordinator;
@@ -36,34 +35,29 @@ internal sealed partial class DatabaseServerViewModel : ObservableObject
 
     private CustomDialog customDialog;
 
-    public DatabaseServerViewModel(IMediator mediator)
-    {
+    public DatabaseServerViewModel (IMediator mediator) {
         this.mediator = mediator;
         _dialogCoordinator = DialogCoordinator.Instance;
         this.customDialog = new CustomDialog { Title = "Edit Server Credentials" };
         customDialog.Content = new EditDatabaseServerCredentials() { DataContext = this };
     }
 
-    public DatabaseServerViewModel() { }
+    public DatabaseServerViewModel () { }
 
     [RelayCommand]
-    async Task TestConnection()
-    {
+    async Task TestConnection () {
         Reset();
 
         Busy = true;
         BusyMessage = "connecting";
 
-        try
-        {
+        try {
             ConnectionSuccess = await mediator.Send(new TestDBConnection() { Credentials = Credentials }, ts.Token);
         }
-        catch (TaskCanceledException)
-        {
+        catch (TaskCanceledException) {
             SetError("Operation canceled");
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             SetError(e.Message);
         }
 
@@ -71,8 +65,7 @@ internal sealed partial class DatabaseServerViewModel : ObservableObject
     }
 
     [RelayCommand]
-    async Task ConnectToDatabase()
-    {
+    async Task ConnectToDatabase () {
         await TestConnection();
         if (!ConnectionSuccess) return;
         var dbList = await mediator.Send(new GetDatabaseList() { ServerCredentials = Credentials }, ts.Token);
@@ -84,38 +77,32 @@ internal sealed partial class DatabaseServerViewModel : ObservableObject
     }
 
     [RelayCommand]
-    async Task ToggleAdvancedEdit()
-    {
-        if (!this.AdvancedEdit)
-        {
+    async Task ToggleAdvancedEdit () {
+        if (!this.AdvancedEdit) {
             await _dialogCoordinator.ShowMetroDialogAsync(this, customDialog);
             this.AdvancedEdit = true;
             (this.customDialog.Content as EditDatabaseServerCredentials)!.FocusControls();
         }
-        else
-        {
+        else {
             await customDialog.RequestCloseAsync();
             await _dialogCoordinator.HideMetroDialogAsync(this, customDialog);
             this.AdvancedEdit = false;
         }
     }
 
-    private void SetError(string message)
-    {
+    private void SetError (string message) {
         ErrorMessage = message;
         HasError = true;
     }
 
-    void Reset()
-    {
+    void Reset () {
         ConnectionSuccess = false;
         HasError = false;
         ErrorMessage = "";
     }
 
     [RelayCommand]
-    void CancelTestConnection()
-    {
+    void CancelTestConnection () {
         ts.Cancel();
         ts.Dispose();
         ts = new();
