@@ -6,10 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CopyDatabase.MsSQLServer;
 
-public static class ServiceExtensions
-{
-    public static IServiceCollection RegisterSqlServerServices(this IServiceCollection services)
-    {
+public static class ServiceExtensions {
+    public static IServiceCollection RegisterSqlServerServices (this IServiceCollection services) {
         services.AddSingleton<IConnectionStringBuilder, MsSQLConnectionStringBuilder>();
         services.AddKeyedSingleton<IDatabaseCatalogProvider, SqlServerDatabaseCatalogProvider>(DatabaseProvider.MsSQLServer);
         services.AddKeyedSingleton<IDatabaseConnectionTester, SqlServerConnectionTester>(DatabaseProvider.MsSQLServer);

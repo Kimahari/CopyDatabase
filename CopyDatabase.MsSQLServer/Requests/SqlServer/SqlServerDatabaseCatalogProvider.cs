@@ -5,17 +5,14 @@ using Microsoft.Data.SqlClient;
 
 namespace CopyDatabase.MsSQLServer.Requests.SqlServer;
 
-internal sealed class SqlServerDatabaseCatalogProvider : IDatabaseCatalogProvider
-{
+internal sealed class SqlServerDatabaseCatalogProvider : IDatabaseCatalogProvider {
     private readonly IConnectionStringBuilder connectionStringBuilder;
 
-    public SqlServerDatabaseCatalogProvider(IConnectionStringBuilder connectionStringBuilder)
-    {
+    public SqlServerDatabaseCatalogProvider (IConnectionStringBuilder connectionStringBuilder) {
         this.connectionStringBuilder = connectionStringBuilder;
     }
 
-    public async Task<string[]> GetDatabaseNamesAsync(IDatabaseServerCredentials credentials, CancellationToken cancellationToken)
-    {
+    public async Task<string[]> GetDatabaseNamesAsync (IDatabaseServerCredentials credentials, CancellationToken cancellationToken) {
         string connectionString = BuildConnection(credentials);
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
@@ -28,19 +25,17 @@ internal sealed class SqlServerDatabaseCatalogProvider : IDatabaseCatalogProvide
         return result.ToArray();
     }
 
-    public async Task<string[]> GetSchemaObjectNamesAsync(
+    public async Task<string[]> GetSchemaObjectNamesAsync (
         IDatabaseServerCredentials credentials,
         string databaseName,
         SchemaObjectType objectType,
-        CancellationToken cancellationToken)
-    {
+        CancellationToken cancellationToken) {
         string connectionString = BuildConnection(credentials, databaseName);
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
         await using var command = connection.CreateCommand();
-        command.CommandText = objectType switch
-        {
+        command.CommandText = objectType switch {
             SchemaObjectType.Table => """
                 SELECT TABLE_SCHEMA + '.' + TABLE_NAME
                 FROM INFORMATION_SCHEMA.TABLES
@@ -66,8 +61,7 @@ internal sealed class SqlServerDatabaseCatalogProvider : IDatabaseCatalogProvide
         return result.ToArray();
     }
 
-    private string BuildConnection(IDatabaseServerCredentials credentials, string databaseName = "")
-    {
+    private string BuildConnection (IDatabaseServerCredentials credentials, string databaseName = "") {
         return connectionStringBuilder.BuildConnection(credentials, databaseName).FromSecureString();
     }
 }

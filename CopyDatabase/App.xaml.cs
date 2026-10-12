@@ -1,4 +1,4 @@
-﻿using ControlzEx.Theming;
+using ControlzEx.Theming;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,10 +13,8 @@ namespace CopyDatabase;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
-{
-    protected override void OnStartup(StartupEventArgs e)
-    {
+public partial class App : Application {
+    protected override void OnStartup (StartupEventArgs e) {
         base.OnStartup(e);
 
         ThemeManager.Current.ThemeSyncMode = ThemeSyncMode.SyncWithAppMode;

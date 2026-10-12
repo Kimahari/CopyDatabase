@@ -1,17 +1,14 @@
-﻿namespace CopyDatabase.Core.Validation.Tests;
+namespace CopyDatabase.Core.Validation.Tests;
 
-public class DatabaseServerCredentialValidatorTests
-{
+public class DatabaseServerCredentialValidatorTests {
     private DatabaseServerCredentialValidator sut;
 
-    public DatabaseServerCredentialValidatorTests()
-    {
+    public DatabaseServerCredentialValidatorTests () {
         this.sut = new DatabaseServerCredentialValidator();
     }
 
     [Fact()]
-    public void ShouldFailValidationWhenSourceIsNotProvided()
-    {
+    public void ShouldFailValidationWhenSourceIsNotProvided () {
         var result = this.sut.Validate(new DatabaseServerTestCredentials());
         Assert.NotNull(result);
         Assert.False(result.IsValid);
@@ -19,10 +16,8 @@ public class DatabaseServerCredentialValidatorTests
     }
 
     [Fact()]
-    public void ShouldFailValiIDatabaseServerCredentialsUsernameIsNotProvided()
-    {
-        var result = this.sut.Validate(new DatabaseServerTestCredentials()
-        {
+    public void ShouldFailValiIDatabaseServerCredentialsUsernameIsNotProvided () {
+        var result = this.sut.Validate(new DatabaseServerTestCredentials() {
             DataSource = "asdf"
         });
         Assert.NotNull(result);
@@ -31,10 +26,8 @@ public class DatabaseServerCredentialValidatorTests
     }
 
     [Fact()]
-    public void ShouldFailValiIDatabaseServerCredentialsPasswordIsNotProvided()
-    {
-        var result = this.sut.Validate(new DatabaseServerTestCredentials()
-        {
+    public void ShouldFailValiIDatabaseServerCredentialsPasswordIsNotProvided () {
+        var result = this.sut.Validate(new DatabaseServerTestCredentials() {
             DataSource = "asdf",
             UserName = "test"
         });

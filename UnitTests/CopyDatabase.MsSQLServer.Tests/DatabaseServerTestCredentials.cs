@@ -2,8 +2,7 @@ using System.Security;
 
 namespace CopyDatabase.MsSQLServer.Tests;
 
-internal sealed class DatabaseServerTestCredentials : IDatabaseServerCredentials
-{
+internal sealed class DatabaseServerTestCredentials : IDatabaseServerCredentials {
     public bool UseWindowsAuth { get; set; }
 
     public string DataSource { get; set; } = "";

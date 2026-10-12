@@ -2,11 +2,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CopyDatabase.MsSQLServer.Tests;
 
-public sealed class ServiceRegistrationTests
-{
+public sealed class ServiceRegistrationTests {
     [Fact]
-    public void RegisterSqlServerServices_RegistersKeyedProviderAdapters()
-    {
+    public void RegisterSqlServerServices_RegistersKeyedProviderAdapters () {
         var services = new ServiceCollection();
         services.RegisterSqlServerServices();
 

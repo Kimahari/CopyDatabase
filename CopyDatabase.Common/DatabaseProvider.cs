@@ -1,7 +1,6 @@
-﻿namespace CopyDatabase.Common;
+namespace CopyDatabase.Common;
 
-public enum DatabaseProvider
-{
+public enum DatabaseProvider {
     MsSQLServer,
     NotKnown,
 }

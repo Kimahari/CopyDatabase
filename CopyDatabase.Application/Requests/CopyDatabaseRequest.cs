@@ -1,9 +1,8 @@
 namespace CopyDatabase.Core.Requests;
 
-public sealed record DatabaseCopyProgress(string DatabaseName, string Message, string? ObjectType = null, string? ObjectName = null);
+public sealed record DatabaseCopyProgress (string DatabaseName, string Message, string? ObjectType = null, string? ObjectName = null);
 
-public sealed record CopyDatabaseRequest : IRequest
-{
+public sealed record CopyDatabaseRequest : IRequest {
     public IDatabaseServerCredentials? SourceCredentials { get; set; }
     public IDatabaseServerCredentials? DestinationCredentials { get; set; }
     public DatabaseProvider Provider { get; set; } = DatabaseProvider.MsSQLServer;
@@ -15,32 +14,26 @@ public sealed record CopyDatabaseRequest : IRequest
     public IProgress<DatabaseCopyProgress>? Progress { get; set; }
 }
 
-public interface IDatabaseCopyExecutor
-{
-    Task CopyAsync(CopyDatabaseRequest request, CancellationToken cancellationToken);
+public interface IDatabaseCopyExecutor {
+    Task CopyAsync (CopyDatabaseRequest request, CancellationToken cancellationToken);
 }
 
-public interface IDatabaseCopyExecutorFactory
-{
-    IDatabaseCopyExecutor GetDatabaseCopyExecutor(DatabaseProvider provider);
+public interface IDatabaseCopyExecutorFactory {
+    IDatabaseCopyExecutor GetDatabaseCopyExecutor (DatabaseProvider provider);
 }
 
-public sealed class CopyDatabaseCommandHandler : IRequestHandler<CopyDatabaseRequest>
-{
+public sealed class CopyDatabaseCommandHandler : IRequestHandler<CopyDatabaseRequest> {
     private readonly IDatabaseCopyExecutorFactory executorFactory;
 
-    public CopyDatabaseCommandHandler(IDatabaseCopyExecutorFactory executorFactory)
-    {
+    public CopyDatabaseCommandHandler (IDatabaseCopyExecutorFactory executorFactory) {
         this.executorFactory = executorFactory;
     }
 
-    public Task Handle(CopyDatabaseRequest request, CancellationToken cancellationToken)
-    {
+    public Task Handle (CopyDatabaseRequest request, CancellationToken cancellationToken) {
         return HandleCore(request, cancellationToken);
     }
 
-    private async Task HandleCore(CopyDatabaseRequest request, CancellationToken cancellationToken)
-    {
+    private async Task HandleCore (CopyDatabaseRequest request, CancellationToken cancellationToken) {
         var executor = executorFactory.GetDatabaseCopyExecutor(request.Provider);
         await executor.CopyAsync(request, cancellationToken);
     }

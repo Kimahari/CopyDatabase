@@ -12,8 +12,7 @@ using CopyDatabase.MsSQLServer;
 
 namespace CopyDatabase.ViewModels;
 
-internal sealed partial class MainViewModel : ObservableObject, IDisposable
-{
+internal sealed partial class MainViewModel : ObservableObject, IDisposable {
     private const string SourceServerConfigurationFile = "server-source.conf";
     private const string DestinationServerConfigurationFile = "server-dest.conf";
     private const string MainConfigurationFile = "app-main.conf";
@@ -47,8 +46,7 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
             ? Message
             : "Idle";
 
-    public MainViewModel()
-    {
+    public MainViewModel () {
         ServiceCollection collection = CreateServices();
 
         provider = collection.BuildServiceProvider();
@@ -60,8 +58,7 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         LoadConfiguration();
     }
 
-    public void Dispose()
-    {
+    public void Dispose () {
         if (disposed) return;
 
         SaveConfiguration();
@@ -69,8 +66,7 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         disposed = true;
     }
 
-    private static ServiceCollection CreateServices()
-    {
+    private static ServiceCollection CreateServices () {
         ServiceCollection collection = new();
         collection.AddLogging();
         collection.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(typeof(GetDatabaseList).Assembly));
@@ -80,50 +76,41 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
-    async Task LoadSourceDatabases()
-    {
+    async Task LoadSourceDatabases () {
         Error = "";
         Message = "Loading databases";
         IsBusy = true;
 
-        try
-        {
+        try {
             var data = await mediatr.Send(new GetDatabaseList { ServerCredentials = Source.Credentials });
             ReplaceItems(Databases, data.Where(IsUserDatabase));
 
-            if (!Databases.Contains(SelectedDatabase))
-            {
+            if (!Databases.Contains(SelectedDatabase)) {
                 SelectedDatabase = Databases.FirstOrDefault() ?? "";
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Error = ex.Message;
         }
-        finally
-        {
+        finally {
             Message = "";
             IsBusy = false;
         }
     }
 
     [RelayCommand]
-    async Task CopySelectedDatabase()
-    {
+    async Task CopySelectedDatabase () {
         Error = "";
         Message = "Copying selected database";
         IsBusy = true;
         ClearTableStatus();
 
-        try
-        {
-            if (string.IsNullOrWhiteSpace(SelectedDatabase))
-            {
+        try {
+            if (string.IsNullOrWhiteSpace(SelectedDatabase)) {
                 throw new InvalidOperationException("Select a source database first.");
             }
 
-            if (CopyWithNewName && string.IsNullOrWhiteSpace(DestinationDatabaseName))
-            {
+            if (CopyWithNewName && string.IsNullOrWhiteSpace(DestinationDatabaseName)) {
                 throw new InvalidOperationException("Destination database name is required when copying with a new name.");
             }
 
@@ -131,8 +118,7 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
 
             var progress = new Progress<DatabaseCopyProgress>(ApplyCopyProgress);
 
-            await mediatr.Send(new CopyDatabaseRequest
-            {
+            await mediatr.Send(new CopyDatabaseRequest {
                 SourceCredentials = Source.Credentials,
                 DestinationCredentials = Destination.Credentials,
                 DatabaseName = SelectedDatabase,
@@ -146,57 +132,48 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
             Message = "Copied";
             foreach (var table in TableItems.Where(oo => oo.Status != "Copied")) table.Status = "Copied";
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Error = ex.Message;
         }
-        finally
-        {
+        finally {
             IsBusy = false;
         }
     }
 
-    async partial void OnSelectedDatabaseChanged(string value)
-    {
+    async partial void OnSelectedDatabaseChanged (string value) {
         OnPropertyChanged(nameof(EffectiveDestinationDatabaseName));
         DestinationDatabaseName = CopyWithNewName ? DestinationDatabaseName : value;
 
-        if (string.IsNullOrWhiteSpace(value))
-        {
+        if (string.IsNullOrWhiteSpace(value)) {
             tableItems.Clear();
             viewNames.Clear();
             return;
         }
 
-        try
-        {
+        try {
             await LoadSelectedDatabaseObjects();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Error = ex.Message;
         }
     }
 
-    partial void OnCopyWithNewNameChanged(bool value)
-    {
+    partial void OnCopyWithNewNameChanged (bool value) {
         if (!value) DestinationDatabaseName = SelectedDatabase;
         OnPropertyChanged(nameof(EffectiveDestinationDatabaseName));
     }
 
-    partial void OnDestinationDatabaseNameChanged(string value) => OnPropertyChanged(nameof(EffectiveDestinationDatabaseName));
+    partial void OnDestinationDatabaseNameChanged (string value) => OnPropertyChanged(nameof(EffectiveDestinationDatabaseName));
 
-    partial void OnMessageChanged(string value) => OnPropertyChanged(nameof(StatusText));
+    partial void OnMessageChanged (string value) => OnPropertyChanged(nameof(StatusText));
 
-    partial void OnErrorChanged(string value) => OnPropertyChanged(nameof(StatusText));
+    partial void OnErrorChanged (string value) => OnPropertyChanged(nameof(StatusText));
 
-    private async Task LoadSelectedDatabaseObjects()
-    {
+    private async Task LoadSelectedDatabaseObjects () {
         Message = "Loading database objects";
         IsBusy = true;
 
-        try
-        {
+        try {
             var tables = await LoadSchemaObjects(SelectedDatabase, SchemaObjectType.Table);
             var views = await LoadSchemaObjects(SelectedDatabase, SchemaObjectType.View);
             TableItems.Clear();
@@ -204,25 +181,21 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
 
             ReplaceItems(ViewNames, views);
         }
-        finally
-        {
+        finally {
             Message = "";
             IsBusy = false;
         }
     }
 
-    private Task<string[]> LoadSchemaObjects(string databaseName, SchemaObjectType objectType)
-    {
-        return mediatr.Send(new GetSchemaObjectList
-        {
+    private Task<string[]> LoadSchemaObjects (string databaseName, SchemaObjectType objectType) {
+        return mediatr.Send(new GetSchemaObjectList {
             ServerCredentials = Source.Credentials,
             DatabaseName = databaseName,
             ObjectType = objectType
         });
     }
 
-    private void ApplyCopyProgress(DatabaseCopyProgress progress)
-    {
+    private void ApplyCopyProgress (DatabaseCopyProgress progress) {
         Message = progress.Message;
 
         if (!string.Equals(progress.ObjectType, "Table", StringComparison.OrdinalIgnoreCase)) return;
@@ -233,35 +206,29 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
 
         table.Status = progress.Message;
         if (progress.Message.StartsWith("Copying data", StringComparison.OrdinalIgnoreCase)
-            && !progress.Message.Contains("rows copied", StringComparison.OrdinalIgnoreCase))
-        {
+            && !progress.Message.Contains("rows copied", StringComparison.OrdinalIgnoreCase)) {
             table.Status = "Copying data";
         }
     }
 
-    private void ClearTableStatus()
-    {
-        foreach (var table in TableItems)
-        {
+    private void ClearTableStatus () {
+        foreach (var table in TableItems) {
             table.Status = "Idle";
             table.Error = "";
         }
     }
 
-    private void LoadConfiguration()
-    {
+    private void LoadConfiguration () {
         LoadCredentials(SourceServerConfigurationFile, Source.Credentials);
         LoadCredentials(DestinationServerConfigurationFile, Destination.Credentials);
         LoadMainConfiguration();
     }
 
-    private void SaveConfiguration()
-    {
+    private void SaveConfiguration () {
         SaveCredentials(SourceServerConfigurationFile, Source.Credentials);
         SaveCredentials(DestinationServerConfigurationFile, Destination.Credentials);
 
-        WriteConfiguration(MainConfigurationFile, new
-        {
+        WriteConfiguration(MainConfigurationFile, new {
             CopySchema,
             CopyData,
             DropDestinationDatabase,
@@ -270,81 +237,66 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         });
     }
 
-    private static void LoadCredentials(string path, IDatabaseServerCredentials credentials)
-    {
+    private static void LoadCredentials (string path, IDatabaseServerCredentials credentials) {
         if (!TryReadConfiguration(path, out var root)) return;
 
-        try
-        {
+        try {
             var dataSource = ReadString(root!, "ServerInstance", "DataSource");
             if (dataSource is not null) credentials.DataSource = dataSource;
 
             var userName = ReadString(root!, "UserName");
             if (userName is not null) credentials.UserName = userName;
         }
-        finally
-        {
+        finally {
             root?.Dispose();
         }
     }
 
-    private void LoadMainConfiguration()
-    {
+    private void LoadMainConfiguration () {
         if (!TryReadConfiguration(MainConfigurationFile, out var root)) return;
 
-        try
-        {
+        try {
             CopySchema = ReadBoolean(root!, "CopySchema", "CopyTables") ?? CopySchema;
             CopyData = ReadBoolean(root!, "CopyData") ?? CopyData;
             DropDestinationDatabase = ReadBoolean(root!, "DropDestinationDatabase", "DropDatabase") ?? DropDestinationDatabase;
             CopyWithNewName = ReadBoolean(root!, "CopyWithNewName") ?? CopyWithNewName;
             DestinationDatabaseName = ReadString(root!, "DestinationDatabaseName") ?? DestinationDatabaseName;
         }
-        finally
-        {
+        finally {
             root?.Dispose();
         }
     }
 
-    private static void SaveCredentials(string path, IDatabaseServerCredentials credentials)
-    {
-        WriteConfiguration(path, new
-        {
+    private static void SaveCredentials (string path, IDatabaseServerCredentials credentials) {
+        WriteConfiguration(path, new {
             ServerInstance = credentials.DataSource,
             credentials.UserName
         });
     }
 
-    private static bool TryReadConfiguration(string path, out JsonDocument? document)
-    {
+    private static bool TryReadConfiguration (string path, out JsonDocument? document) {
         document = null;
 
         if (!File.Exists(path)) return false;
 
-        try
-        {
+        try {
             document = JsonDocument.Parse(File.ReadAllText(path));
             return document.RootElement.ValueKind == JsonValueKind.Object;
         }
-        catch (JsonException)
-        {
+        catch (JsonException) {
             document = null;
             return false;
         }
-        catch (IOException)
-        {
+        catch (IOException) {
             document = null;
             return false;
         }
     }
 
-    private static string? ReadString(JsonDocument document, params string[] propertyNames)
-    {
-        foreach (var propertyName in propertyNames)
-        {
+    private static string? ReadString (JsonDocument document, params string[] propertyNames) {
+        foreach (var propertyName in propertyNames) {
             if (document.RootElement.TryGetProperty(propertyName, out var property)
-                && property.ValueKind is JsonValueKind.String or JsonValueKind.Null)
-            {
+                && property.ValueKind is JsonValueKind.String or JsonValueKind.Null) {
                 return property.GetString();
             }
         }
@@ -352,12 +304,9 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         return null;
     }
 
-    private static bool? ReadBoolean(JsonDocument document, params string[] propertyNames)
-    {
-        foreach (var propertyName in propertyNames)
-        {
-            if (document.RootElement.TryGetProperty(propertyName, out var property))
-            {
+    private static bool? ReadBoolean (JsonDocument document, params string[] propertyNames) {
+        foreach (var propertyName in propertyNames) {
+            if (document.RootElement.TryGetProperty(propertyName, out var property)) {
                 if (property.ValueKind == JsonValueKind.True) return true;
                 if (property.ValueKind == JsonValueKind.False) return false;
             }
@@ -366,24 +315,20 @@ internal sealed partial class MainViewModel : ObservableObject, IDisposable
         return null;
     }
 
-    private static void WriteConfiguration<T>(string path, T configuration)
-    {
-        var json = JsonSerializer.Serialize(configuration, new JsonSerializerOptions
-        {
+    private static void WriteConfiguration<T> (string path, T configuration) {
+        var json = JsonSerializer.Serialize(configuration, new JsonSerializerOptions {
             WriteIndented = true
         });
 
         File.WriteAllText(path, json);
     }
 
-    private static void ReplaceItems<T>(ObservableCollection<T> target, IEnumerable<T> values)
-    {
+    private static void ReplaceItems<T> (ObservableCollection<T> target, IEnumerable<T> values) {
         target.Clear();
         foreach (var value in values) target.Add(value);
     }
 
-    private static bool IsUserDatabase(string databaseName)
-    {
+    private static bool IsUserDatabase (string databaseName) {
         return !databaseName.Equals("master", StringComparison.OrdinalIgnoreCase)
             && !databaseName.Equals("tempdb", StringComparison.OrdinalIgnoreCase)
             && !databaseName.Equals("model", StringComparison.OrdinalIgnoreCase)

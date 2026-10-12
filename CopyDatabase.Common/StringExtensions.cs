@@ -1,9 +1,7 @@
-﻿namespace CopyDatabase.Common;
+namespace CopyDatabase.Common;
 
-public static class StringExtensions
-{
-    public static SecureString ToSecureString(this string value)
-    {
+public static class StringExtensions {
+    public static SecureString ToSecureString (this string value) {
         if (value == null) return new SecureString();
 
         var securePassword = new SecureString();

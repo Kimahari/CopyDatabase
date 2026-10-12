@@ -4,15 +4,13 @@ using Microsoft.Data.SqlClient;
 
 namespace CopyDatabase.MsSQLServer.Tests.Requests;
 
-public sealed class CopyDatabaseDockerIntegrationTests
-{
+public sealed class CopyDatabaseDockerIntegrationTests {
     private const string Password = "CopyDb_Test_12345!";
     private const string SourceDatabaseName = "CopyDatabaseSourceTest";
     private const string DestinationDatabaseName = "CopyDatabaseRenamedTest";
 
     [Fact]
-    public async Task CopyDatabaseRequest_CopiesSelectedDatabaseToRenamedDestination()
-    {
+    public async Task CopyDatabaseRequest_CopiesSelectedDatabaseToRenamedDestination () {
         if (Environment.GetEnvironmentVariable("COPYDATABASE_DOCKER_SQL_TESTS") != "1") return;
 
         await ResetSourceFixture();
@@ -21,8 +19,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
         var progressMessages = new List<DatabaseCopyProgress>();
         var executor = new SqlServerDatabaseCopyExecutor();
 
-        await executor.CopyAsync(new CopyDatabaseRequest
-        {
+        await executor.CopyAsync(new CopyDatabaseRequest {
             SourceCredentials = CreateCredentials("127.0.0.1,14333"),
             DestinationCredentials = CreateCredentials("127.0.0.1,14334"),
             DatabaseName = SourceDatabaseName,
@@ -43,8 +40,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
     }
 
     [Fact]
-    public async Task CopyDatabaseRequest_ReusesExistingDestinationTablesWhenNotDroppingDatabase()
-    {
+    public async Task CopyDatabaseRequest_ReusesExistingDestinationTablesWhenNotDroppingDatabase () {
         if (Environment.GetEnvironmentVariable("COPYDATABASE_DOCKER_SQL_TESTS") != "1") return;
 
         await ResetSourceFixture();
@@ -53,8 +49,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
         var progressMessages = new List<DatabaseCopyProgress>();
         var executor = new SqlServerDatabaseCopyExecutor();
 
-        await executor.CopyAsync(new CopyDatabaseRequest
-        {
+        await executor.CopyAsync(new CopyDatabaseRequest {
             SourceCredentials = CreateCredentials("127.0.0.1,14333"),
             DestinationCredentials = CreateCredentials("127.0.0.1,14334"),
             DatabaseName = SourceDatabaseName,
@@ -75,8 +70,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
     }
 
     [Fact]
-    public async Task CopyDatabaseRequest_CopiesForeignKeysThatReferenceTablesInSameDatabase()
-    {
+    public async Task CopyDatabaseRequest_CopiesForeignKeysThatReferenceTablesInSameDatabase () {
         if (Environment.GetEnvironmentVariable("COPYDATABASE_DOCKER_SQL_TESTS") != "1") return;
 
         await ResetSourceFixture();
@@ -84,8 +78,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
 
         var executor = new SqlServerDatabaseCopyExecutor();
 
-        await executor.CopyAsync(new CopyDatabaseRequest
-        {
+        await executor.CopyAsync(new CopyDatabaseRequest {
             SourceCredentials = CreateCredentials("127.0.0.1,14333"),
             DestinationCredentials = CreateCredentials("127.0.0.1,14334"),
             DatabaseName = SourceDatabaseName,
@@ -111,18 +104,15 @@ public sealed class CopyDatabaseDockerIntegrationTests
             """));
     }
 
-    private static DatabaseServerTestCredentials CreateCredentials(string dataSource)
-    {
-        return new DatabaseServerTestCredentials
-        {
+    private static DatabaseServerTestCredentials CreateCredentials (string dataSource) {
+        return new DatabaseServerTestCredentials {
             DataSource = dataSource,
             UserName = "sa",
             Password = Password.ToSecureString()
         };
     }
 
-    private static async Task ResetSourceFixture()
-    {
+    private static async Task ResetSourceFixture () {
         await using var connection = new SqlConnection(BuildConnection("127.0.0.1,14333"));
         await connection.OpenAsync();
 
@@ -154,8 +144,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
         await Execute(sourceConnection, "EXEC('CREATE VIEW dbo.CopyDatabaseUiView AS SELECT Id, Name FROM dbo.CopyDatabaseUiTable');");
     }
 
-    private static async Task DropDestinationDatabases()
-    {
+    private static async Task DropDestinationDatabases () {
         await using var connection = new SqlConnection(BuildConnection("127.0.0.1,14334"));
         await connection.OpenAsync();
         await Execute(connection, $"""
@@ -172,8 +161,7 @@ public sealed class CopyDatabaseDockerIntegrationTests
             """);
     }
 
-    private static async Task ResetExistingDestinationFixture()
-    {
+    private static async Task ResetExistingDestinationFixture () {
         await DropDestinationDatabases();
 
         await using var connection = new SqlConnection(BuildConnection("127.0.0.1,14334"));
@@ -188,22 +176,19 @@ public sealed class CopyDatabaseDockerIntegrationTests
             """);
     }
 
-    private static string BuildConnection(string dataSource, string databaseName = "")
-    {
+    private static string BuildConnection (string dataSource, string databaseName = "") {
         var builder = new StringBuilder($"Data Source={dataSource};Integrated Security=False;Encrypt=False;User ID=sa;Password={Password};");
         if (!string.IsNullOrWhiteSpace(databaseName)) builder.Append($"Initial Catalog={databaseName};");
         return builder.ToString();
     }
 
-    private static async Task Execute(SqlConnection connection, string sql)
-    {
+    private static async Task Execute (SqlConnection connection, string sql) {
         await using var command = new SqlCommand(sql, connection);
         command.CommandTimeout = 9000;
         await command.ExecuteNonQueryAsync();
     }
 
-    private static async Task<T> Scalar<T>(SqlConnection connection, string sql)
-    {
+    private static async Task<T> Scalar<T> (SqlConnection connection, string sql) {
         await using var command = new SqlCommand(sql, connection);
         object? value = await command.ExecuteScalarAsync();
         return Assert.IsType<T>(value);

@@ -1,10 +1,9 @@
 namespace CopyDatabase.MsSQLServer.Requests.SqlServer;
 
-internal static class SqlServerSql
-{
-    public static string QuoteName(string value) => $"[{value.Replace("]", "]]")}]";
+internal static class SqlServerSql {
+    public static string QuoteName (string value) => $"[{value.Replace("]", "]]")}]";
 
-    public static string EscapeSqlLiteral(string value) => value.Replace("'", "''");
+    public static string EscapeSqlLiteral (string value) => value.Replace("'", "''");
 
     public const string Tables = @"
 SELECT TABLE_SCHEMA, TABLE_NAME

@@ -1,19 +1,16 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 
 namespace CopyDatabase.Controls;
 
 /// <summary>
 /// Interaction logic for DatabaseServerCredentials.xaml
 /// </summary>
-public partial class EditDatabaseServerCredentials : UserControl
-{
-    public EditDatabaseServerCredentials()
-    {
+public partial class EditDatabaseServerCredentials : UserControl {
+    public EditDatabaseServerCredentials () {
         InitializeComponent();
     }
 
-    internal void FocusControls()
-    {
+    internal void FocusControls () {
         dsInput.Focus();
     }
 }

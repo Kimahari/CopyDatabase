@@ -1,19 +1,15 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace CopyDatabase.Common;
 
-public static class SecureStringExtensions
-{
-    public static string FromSecureString(this SecureString value)
-    {
+public static class SecureStringExtensions {
+    public static string FromSecureString (this SecureString value) {
         IntPtr valuePtr = IntPtr.Zero;
-        try
-        {
+        try {
             valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
             return Marshal.PtrToStringUni(valuePtr) ?? "";
         }
-        finally
-        {
+        finally {
             Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
         }
     }
