@@ -12,13 +12,13 @@ Copy Database is published with ClickOnce. Download the current installer from t
 
 [Publish folder](https://github.com/Kimahari/CopyDatabase/tree/master/Publish) | [CopyDatabase.application](https://github.com/Kimahari/CopyDatabase/blob/master/Publish/CopyDatabase.application)
 
-The ClickOnce application artifacts are prepared in `Publish/` so they can be reviewed and signed through the SignPath Foundation process before release. Signing is provided by the SignPath Foundation; do not publish unsigned release artifacts as the final public installer.
+Current releases are unsigned. SignPath Foundation signing is on hold pending a response from their team. The ClickOnce application artifacts are prepared in `Publish/` for release without assembly or manifest signing.
 
 ## Publishing
 
 Use the `ClickOnceProfile` publish profile from Visual Studio or MSBuild. The profile publishes to the repository-local `Publish/` folder and configures the install URL for the GitHub-hosted publish artifacts.
 
-After publishing, send the generated ClickOnce artifacts through SignPath Foundation for code signing, then commit the signed `Publish/` output.
+Validate the generated ClickOnce artifacts and test installation and database copying, then commit the `Publish/` output. Keep `SignManifests` disabled while signing is on hold, and identify the release as unsigned in its release notes.
 
 ## Using the Application
 
